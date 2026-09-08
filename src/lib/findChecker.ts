@@ -84,6 +84,7 @@ export async function checkFind(
     response = await client.messages.create({
       model: MODEL,
       max_tokens: 16000,
+      output_config: { effort: 'low' },
       system: buildSystemPrompt(profile, gaps, closet),
       messages: [{ role: 'user', content: description.trim() }],
     })
