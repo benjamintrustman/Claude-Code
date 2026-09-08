@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { useLocation } from '../hooks/useLocation'
 import { useWeather } from '../hooks/useWeather'
+import { useOutfits } from '../hooks/useOutfits'
+import { useApp } from '../context/AppContext'
 import { WeatherCard } from '../components/WeatherCard'
 import { LocationModal } from '../components/LocationModal'
+import { OutfitCard } from '../components/OutfitCard'
+import { AlertIcon } from '../components/icons'
 
 const OCCASIONS = ['Work', 'Weekend', 'Errands', 'Dinner out', 'Travel', 'Outdoors']
 
 export function Today() {
+  const { closet, profile } = useApp()
   const [occasion, setOccasion] = useState(OCCASIONS[0])
   const [editingLocation, setEditingLocation] = useState(false)
   const { location, status: locationStatus, notice, setManualLocation, useDeviceLocationInstead } =
@@ -15,6 +20,9 @@ export function Today() {
     location.lat,
     location.lon,
   )
+  const { outfits, status: outfitsStatus, error: outfitsError, generate } = useOutfits()
+
+  const canSuggest = weatherStatus === 'ready' && weather != null
 
   return (
     <div className="mx-auto w-full max-w-md flex-1 px-4 py-5">
@@ -53,11 +61,27 @@ export function Today() {
 
       <button
         type="button"
-        disabled
-        className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper opacity-40"
+        disabled={!canSuggest || outfitsStatus === 'loading'}
+        onClick={() => weather && generate(closet, profile, weather, occasion)}
+        className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        Suggest outfits (coming soon)
+        {outfitsStatus === 'loading' ? 'Thinking…' : 'Suggest outfits'}
       </button>
+
+      {outfitsStatus === 'error' && outfitsError && (
+        <p className="mt-3 flex items-start gap-1.5 text-sm text-clay">
+          <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
+          {outfitsError}
+        </p>
+      )}
+
+      {outfitsStatus === 'ready' && (
+        <div className="mt-5 flex flex-col gap-3">
+          {outfits.map((outfit, i) => (
+            <OutfitCard key={i} outfit={outfit} />
+          ))}
+        </div>
+      )}
 
       {editingLocation && (
         <LocationModal
