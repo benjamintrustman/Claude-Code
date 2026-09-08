@@ -29,6 +29,41 @@ npm run build    # type-checks and produces a static dist/ you can host anywhere
 npm run preview  # serve the production build locally
 ```
 
+## Testing on your phone
+
+This app is meant to live on a phone home screen, so test it on one. Browser
+geolocation only works in a **secure context** — over plain
+`http://192.168.x.x` it fails no matter what, so the LAN dev server needs
+HTTPS:
+
+```bash
+npm run dev:phone
+```
+
+That serves over HTTPS with a self-signed cert and prints a `Network:` URL
+(`https://192.168.x.x:5173/`). Open that on your phone, on the same Wi-Fi.
+Safari and Chrome will warn that the certificate isn't trusted — that's
+expected for a self-signed cert. Tap through ("Show details" → "visit this
+website" on iOS) and the page becomes a genuine secure context, so the
+location prompt appears and geolocation works.
+
+Your `.env` key is still picked up in this mode, so outfit suggestions and the
+find checker work here too.
+
+If the certificate warning gets tedious, two alternatives give you a properly
+trusted cert:
+
+- [`mkcert`](https://github.com/FiloSottile/mkcert) — issues a locally-trusted
+  cert; install its CA on the phone once and the warning is gone for good.
+- [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/)
+  — `cloudflared tunnel --url http://localhost:5173` gives a public
+  `https://….trycloudflare.com` URL with a real certificate. Note this exposes
+  your dev server, and therefore your bundled API key, to anyone with the URL
+  while it's running.
+
+To add the app to your home screen: open it in Safari, Share → "Add to Home
+Screen."
+
 ## Screens
 
 - **Today** — weather for your location, an occasion picker, and 3 suggested
