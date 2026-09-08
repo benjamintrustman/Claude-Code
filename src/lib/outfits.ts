@@ -4,7 +4,7 @@ import type { CurrentWeather } from './weather'
 import { weatherCodeInfo } from './weatherCodes'
 import { MissingApiKeyError, getClient } from './anthropicClient'
 
-const MODEL = 'claude-sonnet-4-5'
+const MODEL = 'claude-sonnet-5'
 
 export type OutfitPiece = { category: string; item: string }
 export type OutfitSuggestion = { title: string; pieces: OutfitPiece[]; why: string }
@@ -98,7 +98,7 @@ export async function suggestOutfits(
     const client = getClient()
     response = await client.messages.create({
       model: MODEL,
-      max_tokens: 2048,
+      max_tokens: 16000,
       system: buildSystemPrompt(profile),
       messages: [{ role: 'user', content: buildUserPrompt(eligible, weather, occasion) }],
     })
@@ -123,6 +123,10 @@ export async function suggestOutfits(
 
   if (response.stop_reason === 'refusal') {
     throw new OutfitApiError('The model declined to respond to this request.')
+  }
+
+  if (response.stop_reason === 'max_tokens') {
+    throw new OutfitApiError('The response was cut off before it finished. Try again.')
   }
 
   const textBlock = response.content.find(

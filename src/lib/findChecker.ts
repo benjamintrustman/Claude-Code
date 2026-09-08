@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import type { Gap, Item, ProfileConfig } from '../types'
 import { MissingApiKeyError, getClient } from './anthropicClient'
 
-const MODEL = 'claude-sonnet-4-5'
+const MODEL = 'claude-sonnet-5'
 
 export type FindVerdictType = 'fills_gap' | 'redundant' | 'violates_rule' | 'no_gap'
 
@@ -83,7 +83,7 @@ export async function checkFind(
     const client = getClient()
     response = await client.messages.create({
       model: MODEL,
-      max_tokens: 1024,
+      max_tokens: 16000,
       system: buildSystemPrompt(profile, gaps, closet),
       messages: [{ role: 'user', content: description.trim() }],
     })
@@ -108,6 +108,10 @@ export async function checkFind(
 
   if (response.stop_reason === 'refusal') {
     throw new FindCheckError('The model declined to respond to this request.')
+  }
+
+  if (response.stop_reason === 'max_tokens') {
+    throw new FindCheckError('The response was cut off before it finished. Try again.')
   }
 
   const textBlock = response.content.find(
