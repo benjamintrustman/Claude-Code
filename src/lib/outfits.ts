@@ -99,7 +99,7 @@ export async function suggestOutfits(
     response = await client.messages.create({
       model: MODEL,
       max_tokens: 16000,
-      output_config: { effort: 'low' },
+      output_config: { effort: 'medium' },
       system: buildSystemPrompt(profile),
       messages: [{ role: 'user', content: buildUserPrompt(eligible, weather, occasion) }],
     })
