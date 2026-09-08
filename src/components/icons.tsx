@@ -176,3 +176,29 @@ export function SearchIcon({ className }: IconProps) {
     </svg>
   )
 }
+
+export function CheckIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="m5 12.5 4.5 4.5L19 7" />
+    </svg>
+  )
+}
+
+export function BanIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <circle cx="12" cy="12" r="8" />
+      <path strokeLinecap="round" d="m6.3 6.3 11.4 11.4" />
+    </svg>
+  )
+}
+
+export function CopyIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <rect x="8.5" y="8.5" width="10" height="10" rx="1.6" />
+      <path strokeLinecap="round" d="M15.5 8.5V7a1.6 1.6 0 0 0-1.6-1.6H6.6A1.6 1.6 0 0 0 5 7v7.9a1.6 1.6 0 0 0 1.6 1.6h1.9" />
+    </svg>
+  )
+}

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { Gap, GapPriority } from '../types'
+import type { Gap, GapPriority, Item, ProfileConfig } from '../types'
 import { useApp } from '../context/AppContext'
-import { CloseIcon } from '../components/icons'
+import { useFindChecker } from '../hooks/useFindChecker'
+import { AlertIcon, CloseIcon } from '../components/icons'
+import { FindVerdictCard } from '../components/FindVerdictCard'
 
 const PRIORITY_ORDER: GapPriority[] = ['high', 'medium', 'low']
 
@@ -13,7 +15,7 @@ const PRIORITY_STYLES: Record<GapPriority, string> = {
 }
 
 export function Gaps() {
-  const { gaps, addGap, updateGap, deleteGap } = useApp()
+  const { profile, closet, gaps, addGap, updateGap, deleteGap } = useApp()
   const [adding, setAdding] = useState(false)
 
   const sorted = [...gaps].sort(
@@ -44,15 +46,71 @@ export function Gaps() {
         </ul>
       )}
 
-      <div className="mt-8 rounded-xl border border-line bg-card p-4">
-        <h3 className="mb-1 font-serif text-lg font-semibold text-ink">Check this find</h3>
-        <p className="text-sm text-ink-soft">
-          Describe something you're looking at in a store and get a blunt verdict against your
-          gap list and hard rules. Coming once outfit suggestions are wired up.
-        </p>
-      </div>
+      <FindChecker profile={profile} closet={closet} gaps={gaps} />
 
       {adding && <AddGapModal onClose={() => setAdding(false)} onAdd={addGap} />}
+    </div>
+  )
+}
+
+function FindChecker({
+  profile,
+  closet,
+  gaps,
+}: {
+  profile: ProfileConfig
+  closet: Item[]
+  gaps: Gap[]
+}) {
+  const [description, setDescription] = useState('')
+  const { verdict, status, error, check, reset } = useFindChecker()
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (!description.trim()) return
+    check(description, profile, gaps, closet)
+  }
+
+  return (
+    <div className="mt-8">
+      <h3 className="mb-1 font-serif text-lg font-semibold text-ink">Check this find</h3>
+      <p className="mb-3 text-sm text-ink-soft">
+        Describe something you're looking at in a store and get a blunt verdict against your gap
+        list and hard rules.
+      </p>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <textarea
+          value={description}
+          onChange={(e) => {
+            setDescription(e.target.value)
+            if (status === 'ready' || status === 'error') reset()
+          }}
+          rows={3}
+          placeholder="e.g. Camel corduroy wide-leg trouser, high rise, $180 at a vintage shop"
+          className="w-full resize-none rounded-lg border border-line bg-card px-3 py-2 text-sm text-ink outline-none focus:border-tobacco"
+        />
+        <button
+          type="submit"
+          disabled={!description.trim() || status === 'loading'}
+          className="rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
+        >
+          {status === 'loading' ? 'Checking…' : 'Check this find'}
+        </button>
+      </form>
+
+      {status === 'error' && error && (
+        <p className="mt-3 flex items-start gap-1.5 text-sm text-clay">
+          <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
+          {error}
+        </p>
+      )}
+
+      {status === 'ready' && verdict && (
+        <div className="mt-3">
+          <FindVerdictCard verdict={verdict} />
+        </div>
+      )}
     </div>
   )
 }
