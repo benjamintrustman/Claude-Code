@@ -77,3 +77,102 @@ export function AlertIcon({ className }: IconProps) {
     </svg>
   )
 }
+
+export function CloudIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.5 18a4 4 0 0 1-.4-7.98 5 5 0 0 1 9.62-1.9A4.5 4.5 0 0 1 17.5 18h-11Z"
+      />
+    </svg>
+  )
+}
+
+export function CloudSunIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path strokeLinecap="round" d="M8.2 4.2v1.7M3.6 8.8h1.7M4.9 4.9l1.2 1.2" />
+      <circle cx="8.2" cy="8.8" r="2.6" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.7 19.5a4 4 0 0 1-.4-7.97 5 5 0 0 1 9.62-1.9A4.5 4.5 0 0 1 19.7 19.5H8.7Z"
+      />
+    </svg>
+  )
+}
+
+export function CloudFogIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.5 14.5a4 4 0 0 1-.3-7.98 5 5 0 0 1 9.62-1.9A4.5 4.5 0 0 1 17.5 13"
+      />
+      <path strokeLinecap="round" d="M4 17.5h16M6.5 20.5h11" />
+    </svg>
+  )
+}
+
+export function CloudRainIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.5 15a4 4 0 0 1-.4-7.98 5 5 0 0 1 9.62-1.9A4.5 4.5 0 0 1 17.5 15h-11Z"
+      />
+      <path strokeLinecap="round" d="M8.5 18v2.3M12 18v2.3M15.5 18v2.3" />
+    </svg>
+  )
+}
+
+export function CloudSnowIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.5 15a4 4 0 0 1-.4-7.98 5 5 0 0 1 9.62-1.9A4.5 4.5 0 0 1 17.5 15h-11Z"
+      />
+      <path strokeLinecap="round" d="M8.5 18.2v.1M12 19v.1M15.5 18.2v.1M8.5 20.7v.1M15.5 20.7v.1" />
+    </svg>
+  )
+}
+
+export function CloudLightningIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.5 14a4 4 0 0 1-.4-7.98 5 5 0 0 1 9.62-1.9A4.5 4.5 0 0 1 17.5 14h-11Z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12.5 15.5 9.8 19.8h2.6l-1.6 3.5 4.4-5.4h-2.6l1.7-2.4Z" />
+    </svg>
+  )
+}
+
+export function RefreshIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12a8 8 0 0 1 13.66-5.66M20 12a8 8 0 0 1-13.66 5.66M17.5 4v3.2h-3.2M6.5 20v-3.2h3.2"
+      />
+    </svg>
+  )
+}
+
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path strokeLinecap="round" d="m20 20-4.8-4.8" />
+    </svg>
+  )
+}

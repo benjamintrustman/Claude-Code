@@ -45,6 +45,15 @@ export type Gap = {
   priority: GapPriority
 }
 
+export type LocationSource = 'geolocation' | 'manual' | 'default'
+
+export type Location = {
+  label: string
+  lat: number
+  lon: number
+  source: LocationSource
+}
+
 export type ProfileId = 'ben' | 'yona'
 
 export type ProfileConfig = {
