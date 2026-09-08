@@ -36,30 +36,35 @@ geolocation only works in a **secure context** — over plain
 `http://192.168.x.x` it fails no matter what, so the LAN dev server needs
 HTTPS:
 
+Set up a trusted certificate once (requires
+[mkcert](https://github.com/FiloSottile/mkcert) — `brew install mkcert`):
+
 ```bash
-npm run dev:phone
+npm run setup:certs   # installs the local CA, issues a cert for your LAN IP
+npm run dev:phone     # serves HTTPS on https://192.168.x.x:5173/
 ```
 
-That serves over HTTPS with a self-signed cert and prints a `Network:` URL
-(`https://192.168.x.x:5173/`). Open that on your phone, on the same Wi-Fi.
-Safari and Chrome will warn that the certificate isn't trusted — that's
-expected for a self-signed cert. Tap through ("Show details" → "visit this
-website" on iOS) and the page becomes a genuine secure context, so the
-location prompt appears and geolocation works.
+Open that `Network:` URL on your phone, on the same Wi-Fi.
 
-Your `.env` key is still picked up in this mode, so outfit suggestions and the
-find checker work here too.
+Your Mac trusts the certificate immediately. To make the **phone** trust it —
+one-time, and then you never see a warning again — install the CA there. The
+setup script prints the exact path, but in short:
 
-If the certificate warning gets tedious, two alternatives give you a properly
-trusted cert:
+1. AirDrop or email `rootCA.pem` (from `mkcert -CAROOT`) to the phone, open it.
+2. Settings → General → VPN & Device Management → install the profile.
+3. Settings → General → About → Certificate Trust Settings → turn ON full
+   trust for the mkcert CA.
 
-- [`mkcert`](https://github.com/FiloSottile/mkcert) — issues a locally-trusted
-  cert; install its CA on the phone once and the warning is gone for good.
-- [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/)
-  — `cloudflared tunnel --url http://localhost:5173` gives a public
-  `https://….trycloudflare.com` URL with a real certificate. Note this exposes
-  your dev server, and therefore your bundled API key, to anyone with the URL
-  while it's running.
+Re-run `npm run setup:certs` if your LAN IP changes; the CA stays trusted, so
+you only do steps 1–3 once.
+
+**Without mkcert**, `npm run dev:phone` still works — Vite falls back to a
+throwaway self-signed cert. You'll get a certificate warning you have to tap
+through ("Show details" → "visit this website" on iOS), after which the page is
+still a genuine secure context and geolocation works.
+
+Your `.env` key is picked up in this mode either way, so outfit suggestions and
+the find checker work on the phone too.
 
 To add the app to your home screen: open it in Safari, Share → "Add to Home
 Screen."

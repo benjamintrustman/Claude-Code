@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:phone": "vite --mode https --host",
+    "setup:certs": "bash scripts/setup-certs.sh",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"

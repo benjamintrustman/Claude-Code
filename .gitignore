@@ -15,6 +15,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Local HTTPS certificates from scripts/setup-certs.sh — contains a private key
+certs
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
