@@ -138,11 +138,24 @@ function pickNeglected(items: Item[], recentlyUsed: Set<string>, count: number):
   return chosen
 }
 
-// Asking nicely for variety didn't work: the model kept returning its two or
-// three favourite trousers. So the app now picks the bottoms itself, rotating
-// through the ones it hasn't shown lately, and the model styles around them.
-function assignBottoms(closet: Item[], recentlyUsed: Set<string>): Item[] {
-  return pickNeglected(closet.filter(isBottom), recentlyUsed, 3)
+// Instructing the model to vary its trousers did not work — it kept returning
+// the same favourites whatever the prompt said. The only reliable lever is
+// what reaches the request: it cannot wear a trouser it was never shown.
+//
+// So each run offers a rotating subset of the bottoms, drawn from the ones not
+// suggested lately. Two are assigned to specific outfits; the third outfit
+// picks freely from the same short list, which keeps some judgement with the
+// model without letting it fall back on the same pair every time.
+const BOTTOMS_OFFERED = 5
+const BOTTOMS_ASSIGNED = 2
+
+function rotatingBottoms(
+  closet: Item[],
+  recentlyUsed: Set<string>,
+): { offered: Item[]; assigned: Item[] } {
+  const bottoms = closet.filter(isBottom)
+  const offered = pickNeglected(bottoms, recentlyUsed, Math.min(BOTTOMS_OFFERED, bottoms.length))
+  return { offered, assigned: offered.slice(0, BOTTOMS_ASSIGNED) }
 }
 
 // The prompt is otherwise byte-identical run to run, and this model takes no
@@ -157,13 +170,17 @@ function buildUserPrompt(
   occasion: string,
   recent: RecentOutfit[],
 ): string {
+  const recentlyUsed = recentlyUsedNames(recent)
+  const { offered, assigned } = rotatingBottoms(closet, recentlyUsed)
+  const offeredIds = new Set(offered.map((it) => it.id))
+
+  // Bottoms outside today's rotation are withheld from the list entirely, so
+  // reaching for a favourite is not an option the model has.
   const closetLines = closet
+    .filter((it) => !isBottom(it) || offeredIds.has(it.id))
     .map((it) => `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})`)
     .join('\n')
-  const recentlyUsed = recentlyUsedNames(recent)
-  const bottoms = assignBottoms(closet, recentlyUsed)
-    .map((it, i) => `- Outfit ${i + 1}: ${it.name}`)
-    .join('\n')
+  const bottoms = assigned.map((it, i) => `- Outfit ${i + 1}: ${it.name}`).join('\n')
   const spotlight = spotlightPieces(closet, recentlyUsed)
     .map((it) => `- ${it.name}`)
     .join('\n')
@@ -187,9 +204,9 @@ Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, h
 
 Occasion: ${occasion}
 ${recentBlock}
-Bottoms are assigned — build each outfit around the one named here, rotating the wardrobe rather than reaching for favourites:
+Build these two outfits around the bottom named, so the wardrobe rotates rather than repeating:
 ${bottoms}
-If an assigned bottom genuinely cannot work today (too warm, too formal, wrong for rain), substitute the nearest alternative and say why in that outfit's "why". Do that at most once across the three.
+The third outfit takes whichever remaining bottom from the closet list above suits it best. All three must use a different bottom.
 
 Other pieces that haven't come up recently — work at least two of them in, unless they truly don't suit today:
 ${spotlight}
