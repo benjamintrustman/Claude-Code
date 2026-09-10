@@ -23,23 +23,24 @@ export function eligibleCloset(closet: Item[]): Item[] {
 }
 
 function buildSystemPrompt(profile: ProfileConfig): string {
-  const rules = profile.hardRules.map((r) => `- ${r}`).join('\n')
+  const rules = profile.hardRules.length
+    ? `\n\nHard rules (never violate these):\n${profile.hardRules.map((r) => `- ${r}`).join('\n')}`
+    : ''
   const palette = profile.colorPalette
     ? `\n\nPreferred color palette: ${profile.colorPalette.join(', ')}`
     : ''
   return `You are a personal styling assistant for a wardrobe app called Fit Check. Suggest outfits built ONLY from clothes the user already owns — never invent or substitute items.
 
-User's aesthetic: ${profile.aesthetic}
+User's aesthetic: ${profile.aesthetic}${rules}${palette}
 
-Hard rules (never violate these):
-${rules}${palette}
+Every piece in this closet already meets the user's standards for fit, rise, and silhouette — they own it, so it passed. Never skip a piece because you cannot tell from its name whether it complies with some rule, and never limit yourself to the items whose names happen to state their cut. Treat the whole closet as equally wearable and judge only on colour, texture, formality, and weather.
 
 Respond with ONLY a JSON array of exactly 3 outfits — no prose before or after, no markdown code fences. Each outfit object must have this exact shape:
 {"title": "short punchy name", "pieces": [{"category": "Outerwear", "item": "exact item name from the closet list"}], "why": "one sentence on why this works for today's conditions"}
 
 The "item" value must be copied verbatim from the closet list below — do not paraphrase, abbreviate, or invent items. Each of the 3 outfits should be a complete, wearable look appropriate for the occasion and today's weather.
 
-The three must be genuinely different from each other, not variations on one idea: no two may share more than one piece, and they must not all use the same trouser or the same outerwear. Reach for different silhouettes and different parts of the closet. A wardrobe this size has many workable answers — a correct-but-predictable set of three is a worse response than three that each open up a different piece.`
+The three must be genuinely different, not variations on one idea: all three must use a DIFFERENT bottom (trouser or skirt), no two may share more than one piece, and they must not all use the same outerwear. Reach for different silhouettes and different corners of the closet. A wardrobe this size has many workable answers — a correct-but-predictable set of three is a worse response than three that each open up a different piece.`
 }
 
 // The local clock where the weather is, not where the browser is — a manually
@@ -101,10 +102,20 @@ function shuffle<T>(items: T[]): T[] {
 // The prompt is otherwise byte-identical run to run, and this model takes no
 // temperature, so the spotlight is where run-to-run variation comes from:
 // a different random handful of neglected pieces each time.
+//
+// Bottoms get their own quota. Sampled from the closet at large they are a
+// fifth of it, which is not enough pressure to break the habit of reaching for
+// the same couple of trousers.
 function spotlightPieces(closet: Item[], recentlyUsed: Set<string>): Item[] {
-  const neglected = closet.filter((it) => !recentlyUsed.has(it.name))
-  const pool = neglected.length >= 6 ? neglected : closet
-  return shuffle(pool).slice(0, 8)
+  const pick = (items: Item[], count: number) => {
+    const neglected = items.filter((it) => !recentlyUsed.has(it.name))
+    return shuffle(neglected.length >= count ? neglected : items).slice(0, count)
+  }
+  const isBottom = (it: Item) => it.category === 'Trousers' || it.category === 'Skirt'
+  return [
+    ...pick(closet.filter(isBottom), 4),
+    ...pick(closet.filter((it) => !isBottom(it)), 6),
+  ]
 }
 
 function buildUserPrompt(
@@ -140,7 +151,7 @@ Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, h
 
 Occasion: ${occasion}
 ${recentBlock}
-Pieces that haven't come up recently — build at least two of the three outfits around something from this list, unless a piece genuinely doesn't suit today's conditions or occasion:
+Pieces that haven't come up recently — build at least two of the three outfits around something from this list, and take your bottoms from it wherever the weather and occasion allow. Skip a piece only if it genuinely doesn't suit today:
 ${spotlight}
 
 Suggest 3 outfits.`
