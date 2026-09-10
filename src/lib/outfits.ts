@@ -46,15 +46,69 @@ Respond with ONLY a JSON array of exactly 3 outfits — no prose before or after
 The "item" value must be copied verbatim from the closet list below — do not paraphrase, abbreviate, or invent items. Each of the 3 outfits should be a complete, wearable, visually distinct look appropriate for the occasion and today's weather.`
 }
 
+// The local clock where the weather is, not where the browser is — a manually
+// set location can sit in another timezone.
+function localNow(timezone: string): { label: string; hour: number } {
+  const now = new Date()
+  try {
+    const label = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    }).format(now)
+    const hour = Number(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        hour: '2-digit',
+        hourCycle: 'h23',
+      }).format(now),
+    )
+    return { label, hour: Number.isFinite(hour) ? hour : now.getHours() }
+  } catch {
+    return {
+      label: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      hour: now.getHours(),
+    }
+  }
+}
+
+// A 22° swing and a 4° swing call for completely different outfits even at the
+// same current temperature, so say which way the day is heading.
+function dayArcGuidance(weather: CurrentWeather, hour: number): string {
+  const swing = Math.round(weather.high - weather.low)
+  // Daily highs land mid-afternoon; past that the day is heading for the low.
+  const warmingAhead = hour < 15
+
+  if (swing >= 15) {
+    return warmingAhead
+      ? `It climbs roughly ${Math.round(weather.high - weather.temp)}° from here, so favor layers that come off cleanly and avoid committing to the heaviest outerwear.`
+      : `It falls toward ${Math.round(weather.low)}° from here, so include a layer for the evening cool-down.`
+  }
+  if (swing <= 8) {
+    return 'Conditions hold close to this all day, so dress for what it is right now.'
+  }
+  return warmingAhead
+    ? 'It warms moderately from here, so a light sheddable layer beats a heavy one.'
+    : 'It cools moderately from here, so keep a layer available for later.'
+}
+
 function buildUserPrompt(closet: Item[], weather: CurrentWeather, occasion: string): string {
   const closetLines = closet
     .map((it) => `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})`)
     .join('\n')
   const condition = weatherCodeInfo(weather.code).label
+  const { label: timeLabel, hour } = localNow(weather.timezone)
+  const swing = Math.round(weather.high - weather.low)
+  const precip = weather.precipitation > 0 ? `, ${weather.precipitation}" precipitation` : ''
+
   return `Closet (only these items are available to use):
 ${closetLines}
 
-Today's weather: ${Math.round(weather.temp)}°F, feels like ${Math.round(weather.feelsLike)}°F, ${condition}, wind ${Math.round(weather.windSpeed)} mph, high ${Math.round(weather.high)}° / low ${Math.round(weather.low)}°.
+Right now (${timeLabel}): ${Math.round(weather.temp)}°F, feels like ${Math.round(weather.feelsLike)}°F, ${condition}, wind ${Math.round(weather.windSpeed)} mph${precip}.
+Today's range: low ${Math.round(weather.low)}°F to high ${Math.round(weather.high)}°F — a ${swing}° swing.
+
+Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, hour)}
 
 Occasion: ${occasion}
 
