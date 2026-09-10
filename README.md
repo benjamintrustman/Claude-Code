@@ -121,6 +121,42 @@ acceptable tradeoff for a personal app running on your own device, but it is
 small server-side proxy that holds the key and forwards requests, so the key
 never reaches the browser.
 
+## Backing up and moving your closet
+
+Your closet lives in the browser's `localStorage`, which means it is **per
+device** — the copy on your phone and the copy on your laptop are separate,
+and clearing site data wipes it. So back it up.
+
+**Closet → Back up or transfer** does both directions:
+
+- **Export** copies the whole closet and gap list as JSON, or saves it as a
+  file. Paste that into the other device's Import and you're synced.
+- **Import** takes a pasted export, a saved file, or any JSON with an `items`
+  array. **Add to closet** merges, skipping anything whose name you already
+  have, so re-importing the same data twice is harmless. **Replace all** swaps
+  the closet wholesale.
+
+Import is deliberately forgiving, because a wardrobe transcribed from photos
+is never tidy. It strips ```json fences, accepts loose category names
+(`pants`, `shoes`, `sweater`, `t-shirt` …), reads a rise given as `"14.5"` as
+well as `14.5`, and skips unusable rows with a note rather than failing the
+whole paste.
+
+### Building the inventory in a Claude project
+
+If you catalogue clothes by photographing them in a Claude project, ask that
+project for the JSON and paste it straight into Import:
+
+> Give me my wardrobe as a JSON object with an `items` array. Each item needs
+> `name`, `category`, and `color`; add `brand` and `rise` (inches, trousers
+> only) where known. Use these categories exactly: Outerwear, Overshirt,
+> Shirt, Knitwear, Basics/Tee, Trousers, Skirt, Dress/Top, Footwear, Bag,
+> Belt. Output only the JSON.
+
+The minimum an item needs is a name and a category. Everything else improves
+the suggestions but is optional — colour especially, since the outfit logic
+leans on it.
+
 ## Data reset
 
 Settings includes a "reset to seed data" option per profile, which restores

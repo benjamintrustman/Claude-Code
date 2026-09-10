@@ -23,6 +23,7 @@ type AppState = {
   addGap: (gap: Omit<Gap, 'id'>) => void
   updateGap: (id: string, patch: Partial<Gap>) => void
   deleteGap: (id: string) => void
+  replaceCloset: (items: Omit<Item, 'id'>[], gaps: Omit<Gap, 'id'>[]) => void
   resetToSeed: () => void
 }
 
@@ -121,6 +122,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [setGaps],
   )
 
+  const replaceCloset = useCallback(
+    (items: Omit<Item, 'id'>[], incomingGaps: Omit<Gap, 'id'>[]) => {
+      setData((prev) => ({
+        ...prev,
+        closet: items.map((it) => ({ ...it, id: newId() })),
+        gaps: incomingGaps.map((g) => ({ ...g, id: newId() })),
+      }))
+    },
+    [],
+  )
+
   const resetToSeed = useCallback(() => {
     setData((prev) => ({
       ...prev,
@@ -142,9 +154,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addGap,
       updateGap,
       deleteGap,
+      replaceCloset,
       resetToSeed,
     }),
-    [profileId, closet, gaps, setProfileId, addItem, updateItem, deleteItem, addGap, updateGap, deleteGap, resetToSeed],
+    [profileId, closet, gaps, setProfileId, addItem, updateItem, deleteItem, addGap, updateGap, deleteGap, replaceCloset, resetToSeed],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

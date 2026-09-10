@@ -3,12 +3,15 @@ import type { Category, Item } from '../types'
 import { CATEGORIES } from '../types'
 import { useApp } from '../context/AppContext'
 import { ItemForm } from '../components/ItemForm'
+import { TransferModal } from '../components/TransferModal'
 import { CloseIcon } from '../components/icons'
 
 export function Closet() {
-  const { closet, profile, deleteItem, updateItem, resetToSeed } = useApp()
+  const { closet, profile, gaps, addItem, addGap, replaceCloset, deleteItem, updateItem, resetToSeed } =
+    useApp()
   const [filter, setFilter] = useState<Category | 'All'>('All')
   const [editing, setEditing] = useState<Item | null>(null)
+  const [transferring, setTransferring] = useState(false)
 
   const counts = useMemo(() => {
     const map = new Map<Category, number>()
@@ -100,7 +103,38 @@ export function Closet() {
         />
       )}
 
-      <div className="mt-8 border-t border-line pt-4 text-center">
+      {transferring && (
+        <TransferModal
+          profileName={profile.name}
+          items={closet}
+          gaps={gaps}
+          onClose={() => setTransferring(false)}
+          onImport={(parsed, mode) => {
+            if (mode === 'replace') {
+              replaceCloset(parsed.items, parsed.gaps)
+              return
+            }
+            // Merge by name, so re-importing the same export is harmless.
+            const existing = new Set(closet.map((it) => it.name.toLowerCase()))
+            parsed.items
+              .filter((it) => !existing.has(it.name.toLowerCase()))
+              .forEach((it) => addItem(it))
+            const existingGaps = new Set(gaps.map((g) => g.title.toLowerCase()))
+            parsed.gaps
+              .filter((g) => !existingGaps.has(g.title.toLowerCase()))
+              .forEach((g) => addGap(g))
+          }}
+        />
+      )}
+
+      <div className="mt-8 flex flex-col items-center gap-3 border-t border-line pt-4 text-center">
+        <button
+          type="button"
+          onClick={() => setTransferring(true)}
+          className="rounded-full border border-line px-4 py-2 text-sm text-ink-soft hover:border-tobacco/50 hover:text-ink"
+        >
+          Back up or transfer this closet
+        </button>
         <button
           type="button"
           onClick={() => {
