@@ -34,13 +34,85 @@ const CATEGORY_ORDER: Category[] = [
   'Bag',
 ]
 
-function orderPieces(pieces: ValidatedPiece[], closet: Item[]): ValidatedPiece[] {
+// Punctuation, case and spacing vary in what comes back — "Toast sand/khaki
+// wide-leg trouser" is the same garment as "Toast sand/khaki pleated wide-leg
+// trouser". Compare on a flattened form so a cosmetic difference doesn't get
+// reported to the user as an invented item.
+function nameKey(name: string): string {
+  return (
+    name
+      .normalize('NFD')
+      // Strip accents, so "Berner Kuhl" still finds "Berner Kühl".
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+  )
+}
+
+const STOPWORDS = new Set(['the', 'a', 'an', 'and', 'with', 'in', 'of'])
+
+function tokens(key: string): string[] {
+  return key.split(' ').filter((t) => t && !STOPWORDS.has(t))
+}
+
+/**
+ * How much of the shorter name is present in the longer one. Catches a dropped
+ * or added descriptor anywhere in the string — "Toast sand/khaki wide-leg
+ * trouser" against "Toast sand/khaki pleated wide-leg trouser" — which plain
+ * containment misses because the omission is in the middle.
+ */
+function overlap(a: string[], b: string[]): number {
+  if (!a.length || !b.length) return 0
+  const setB = new Set(b)
+  const shared = a.filter((t) => setB.has(t)).length
+  return shared / Math.min(a.length, b.length)
+}
+
+const MATCH_THRESHOLD = 0.8
+const MIN_SHARED_TOKENS = 2
+
+/**
+ * Resolves a returned name to a real closet item, tolerating the cosmetic
+ * differences that come back — case, punctuation, accents, a missing
+ * adjective. Returns null only when nothing plausibly matches, so a genuine
+ * invention is still reported rather than silently mapped onto something real.
+ */
+function resolveItem(name: string, closet: Item[]): Item | null {
+  const key = nameKey(name)
+  if (!key) return null
+
+  const exact = closet.find((it) => nameKey(it.name) === key)
+  if (exact) return exact
+
+  const wanted = tokens(key)
+  let best: { item: Item; score: number } | null = null
+
+  for (const it of closet) {
+    const candidate = tokens(nameKey(it.name))
+    const shared = candidate.filter((t) => wanted.includes(t)).length
+    if (shared < MIN_SHARED_TOKENS) continue
+    const score = overlap(wanted, candidate)
+    if (score >= MATCH_THRESHOLD && (!best || score > best.score)) {
+      best = { item: it, score }
+    }
+  }
+
+  return best?.item ?? null
+}
+
+function resolvePieces(pieces: OutfitPiece[], closet: Item[]): ValidatedPiece[] {
   const rank = new Map(CATEGORY_ORDER.map((c, i) => [c as string, i]))
-  const byName = new Map(closet.map((it) => [it.name, it]))
-  // Prefer the closet's own category over whatever the model labelled it.
-  const categoryOf = (p: ValidatedPiece) => byName.get(p.item)?.category ?? p.category
-  return [...pieces]
-    .map((p) => ({ ...p, category: categoryOf(p) }))
+  return pieces
+    .map((p) => {
+      const match = resolveItem(p.item, closet)
+      return match
+        ? // Use the closet's own name and category, so the card shows the real
+          // item and the rotation history records a name it can match later.
+          { item: match.name, category: match.category as string, valid: true }
+        : { ...p, valid: false }
+    })
     .sort((a, b) => (rank.get(a.category) ?? 99) - (rank.get(b.category) ?? 99))
 }
 
@@ -312,14 +384,10 @@ export async function suggestOutfits(
     throw new OutfitApiError('The model returned an unexpected response shape.')
   }
 
-  const closetNames = new Set(closet.map((it) => it.name))
   const validated = parsed.map((outfit) => ({
     title: outfit.title,
     why: outfit.why,
-    pieces: orderPieces(
-      outfit.pieces.map((p) => ({ ...p, valid: closetNames.has(p.item) })),
-      closet,
-    ),
+    pieces: resolvePieces(outfit.pieces, closet),
   }))
 
   recordOutfits(profile.id, validated)
