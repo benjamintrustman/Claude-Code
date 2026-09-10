@@ -3,6 +3,8 @@ import type { Item, ProfileConfig } from '../types'
 import type { CurrentWeather } from './weather'
 import { weatherCodeInfo } from './weatherCodes'
 import { MissingApiKeyError, getClient } from './anthropicClient'
+import type { RecentOutfit } from './outfitHistory'
+import { loadRecentOutfits, recentlyUsedNames, recordOutfits } from './outfitHistory'
 
 const MODEL = 'claude-sonnet-5'
 
@@ -35,7 +37,9 @@ ${rules}${palette}
 Respond with ONLY a JSON array of exactly 3 outfits — no prose before or after, no markdown code fences. Each outfit object must have this exact shape:
 {"title": "short punchy name", "pieces": [{"category": "Outerwear", "item": "exact item name from the closet list"}], "why": "one sentence on why this works for today's conditions"}
 
-The "item" value must be copied verbatim from the closet list below — do not paraphrase, abbreviate, or invent items. Each of the 3 outfits should be a complete, wearable, visually distinct look appropriate for the occasion and today's weather.`
+The "item" value must be copied verbatim from the closet list below — do not paraphrase, abbreviate, or invent items. Each of the 3 outfits should be a complete, wearable look appropriate for the occasion and today's weather.
+
+The three must be genuinely different from each other, not variations on one idea: no two may share more than one piece, and they must not all use the same trouser or the same outerwear. Reach for different silhouettes and different parts of the closet. A wardrobe this size has many workable answers — a correct-but-predictable set of three is a worse response than three that each open up a different piece.`
 }
 
 // The local clock where the weather is, not where the browser is — a manually
@@ -85,10 +89,42 @@ function dayArcGuidance(weather: CurrentWeather, hour: number): string {
     : 'It cools moderately from here, so keep a layer available for later.'
 }
 
-function buildUserPrompt(closet: Item[], weather: CurrentWeather, occasion: string): string {
+function shuffle<T>(items: T[]): T[] {
+  const a = [...items]
+  for (let i = a.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+// The prompt is otherwise byte-identical run to run, and this model takes no
+// temperature, so the spotlight is where run-to-run variation comes from:
+// a different random handful of neglected pieces each time.
+function spotlightPieces(closet: Item[], recentlyUsed: Set<string>): Item[] {
+  const neglected = closet.filter((it) => !recentlyUsed.has(it.name))
+  const pool = neglected.length >= 6 ? neglected : closet
+  return shuffle(pool).slice(0, 8)
+}
+
+function buildUserPrompt(
+  closet: Item[],
+  weather: CurrentWeather,
+  occasion: string,
+  recent: RecentOutfit[],
+): string {
   const closetLines = closet
     .map((it) => `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})`)
     .join('\n')
+  const recentlyUsed = recentlyUsedNames(recent)
+  const spotlight = spotlightPieces(closet, recentlyUsed)
+    .map((it) => `- ${it.name}`)
+    .join('\n')
+  const recentBlock = recent.length
+    ? `\nAlready suggested in the last few days — do not repeat these combinations, and don't lean on the same hero pieces again:\n${recent
+        .map((o) => `- ${o.pieces.join(' + ')}`)
+        .join('\n')}\n`
+    : ''
   const condition = weatherCodeInfo(weather.code).label
   const { label: timeLabel, hour } = localNow(weather.timezone)
   const swing = Math.round(weather.high - weather.low)
@@ -103,6 +139,9 @@ Today's range: low ${Math.round(weather.low)}°F to high ${Math.round(weather.hi
 Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, hour)}
 
 Occasion: ${occasion}
+${recentBlock}
+Pieces that haven't come up recently — build at least two of the three outfits around something from this list, unless a piece genuinely doesn't suit today's conditions or occasion:
+${spotlight}
 
 Suggest 3 outfits.`
 }
@@ -147,7 +186,12 @@ export async function suggestOutfits(
       max_tokens: 16000,
       output_config: { effort: 'medium' },
       system: buildSystemPrompt(profile),
-      messages: [{ role: 'user', content: buildUserPrompt(eligible, weather, occasion) }],
+      messages: [
+        {
+          role: 'user',
+          content: buildUserPrompt(eligible, weather, occasion, loadRecentOutfits(profile.id)),
+        },
+      ],
     })
   } catch (err) {
     if (err instanceof MissingApiKeyError) {
@@ -195,9 +239,12 @@ export async function suggestOutfits(
   }
 
   const closetNames = new Set(closet.map((it) => it.name))
-  return parsed.map((outfit) => ({
+  const validated = parsed.map((outfit) => ({
     title: outfit.title,
     why: outfit.why,
     pieces: outfit.pieces.map((p) => ({ ...p, valid: closetNames.has(p.item) })),
   }))
+
+  recordOutfits(profile.id, validated)
+  return validated
 }
