@@ -12,6 +12,8 @@ export type OutfitPiece = { category: string; item: string }
 export type OutfitSuggestion = { title: string; pieces: OutfitPiece[]; why: string }
 export type ValidatedPiece = OutfitPiece & { valid: boolean }
 export type ValidatedOutfit = { title: string; why: string; pieces: ValidatedPiece[] }
+/** `bottomsOffered` is surfaced in the UI so the rotation is visible, not a claim. */
+export type OutfitResult = { outfits: ValidatedOutfit[]; bottomsOffered: string[] }
 
 export class OutfitApiError extends Error {}
 
@@ -169,9 +171,10 @@ function buildUserPrompt(
   weather: CurrentWeather,
   occasion: string,
   recent: RecentOutfit[],
+  offered: Item[],
+  assigned: Item[],
 ): string {
   const recentlyUsed = recentlyUsedNames(recent)
-  const { offered, assigned } = rotatingBottoms(closet, recentlyUsed)
   const offeredIds = new Set(offered.map((it) => it.id))
 
   // Bottoms outside today's rotation are withheld from the list entirely, so
@@ -238,13 +241,16 @@ export async function suggestOutfits(
   profile: ProfileConfig,
   weather: CurrentWeather,
   occasion: string,
-): Promise<ValidatedOutfit[]> {
+): Promise<OutfitResult> {
   const eligible = eligibleCloset(closet)
   if (eligible.length === 0) {
     throw new OutfitApiError(
       "Your closet doesn't have any eligible pieces to suggest from yet — add some items first.",
     )
   }
+
+  const recent = loadRecentOutfits(profile.id)
+  const { offered, assigned } = rotatingBottoms(eligible, recentlyUsedNames(recent))
 
   let response: Anthropic.Message
   try {
@@ -257,7 +263,7 @@ export async function suggestOutfits(
       messages: [
         {
           role: 'user',
-          content: buildUserPrompt(eligible, weather, occasion, loadRecentOutfits(profile.id)),
+          content: buildUserPrompt(eligible, weather, occasion, recent, offered, assigned),
         },
       ],
     })
@@ -317,5 +323,5 @@ export async function suggestOutfits(
   }))
 
   recordOutfits(profile.id, validated)
-  return validated
+  return { outfits: validated, bottomsOffered: offered.map((it) => it.name) }
 }

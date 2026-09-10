@@ -20,7 +20,13 @@ export function Today() {
     location.lat,
     location.lon,
   )
-  const { outfits, status: outfitsStatus, error: outfitsError, generate } = useOutfits()
+  const {
+    outfits,
+    bottomsOffered,
+    status: outfitsStatus,
+    error: outfitsError,
+    generate,
+  } = useOutfits()
 
   const canSuggest = weatherStatus === 'ready' && weather != null
 
@@ -80,6 +86,11 @@ export function Today() {
           {outfits.map((outfit, i) => (
             <OutfitCard key={i} outfit={outfit} />
           ))}
+          {bottomsOffered.length > 0 && (
+            <p className="px-1 pt-1 text-xs leading-relaxed text-ink-soft">
+              <span className="font-medium">Today's rotation:</span> {bottomsOffered.join(' · ')}
+            </p>
+          )}
         </div>
       )}
 

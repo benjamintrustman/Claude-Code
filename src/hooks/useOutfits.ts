@@ -8,6 +8,7 @@ export type OutfitsStatus = 'idle' | 'loading' | 'ready' | 'error'
 
 export function useOutfits() {
   const [outfits, setOutfits] = useState<ValidatedOutfit[]>([])
+  const [bottomsOffered, setBottomsOffered] = useState<string[]>([])
   const [status, setStatus] = useState<OutfitsStatus>('idle')
   const [error, setError] = useState<string | null>(null)
 
@@ -17,7 +18,8 @@ export function useOutfits() {
       setError(null)
       try {
         const result = await suggestOutfits(closet, profile, weather, occasion)
-        setOutfits(result)
+        setOutfits(result.outfits)
+        setBottomsOffered(result.bottomsOffered)
         setStatus('ready')
       } catch (err) {
         setError(err instanceof OutfitApiError ? err.message : 'Could not generate outfit suggestions.')
@@ -27,5 +29,5 @@ export function useOutfits() {
     [],
   )
 
-  return { outfits, status, error, generate }
+  return { outfits, bottomsOffered, status, error, generate }
 }
