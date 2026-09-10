@@ -13,19 +13,11 @@ export type ValidatedOutfit = { title: string; why: string; pieces: ValidatedPie
 
 export class OutfitApiError extends Error {}
 
-export function eligibleCloset(closet: Item[], profile: ProfileConfig): Item[] {
-  return closet.filter((it) => {
-    if (it.functional) return false
-    if (
-      it.category === 'Trousers' &&
-      profile.minRise != null &&
-      it.rise != null &&
-      it.rise < profile.minRise
-    ) {
-      return false
-    }
-    return true
-  })
+// Anything in the closet is fair game — owning it means it already works. The
+// rise minimum is a buying rule, applied by the find checker, not here.
+// Functional pieces stay out: they're chosen for utility, not for a look.
+export function eligibleCloset(closet: Item[]): Item[] {
+  return closet.filter((it) => !it.functional)
 }
 
 function buildSystemPrompt(profile: ProfileConfig): string {
@@ -140,7 +132,7 @@ export async function suggestOutfits(
   weather: CurrentWeather,
   occasion: string,
 ): Promise<ValidatedOutfit[]> {
-  const eligible = eligibleCloset(closet, profile)
+  const eligible = eligibleCloset(closet)
   if (eligible.length === 0) {
     throw new OutfitApiError(
       "Your closet doesn't have any eligible pieces to suggest from yet — add some items first.",

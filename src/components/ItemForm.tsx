@@ -35,8 +35,6 @@ export function ItemForm({
   const [photoLoading, setPhotoLoading] = useState(false)
 
   const isTrousers = values.category === 'Trousers'
-  const riseFlagged =
-    isTrousers && profile.minRise != null && values.rise != null && values.rise < profile.minRise
 
   function set<K extends keyof ItemFormValues>(key: K, val: ItemFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: val }))
@@ -123,9 +121,10 @@ export function ItemForm({
             onChange={(e) => set('rise', e.target.value ? Number(e.target.value) : undefined)}
             className={inputClass}
           />
-          {riseFlagged && (
-            <p className="mt-1.5 text-sm text-clay">
-              Below your {profile.minRise}" minimum — will be excluded from outfit suggestions.
+          {profile.minRise != null && (
+            <p className="mt-1.5 text-sm text-ink-soft">
+              Recorded for reference. Your {profile.minRise}" minimum applies when checking a new
+              find, not to what you already own.
             </p>
           )}
         </Field>

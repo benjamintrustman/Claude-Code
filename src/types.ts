@@ -60,7 +60,11 @@ export type ProfileConfig = {
   id: ProfileId
   name: string
   aesthetic: string
+  /** Rules that govern wearing what you own — applied to outfit suggestions and to new finds. */
   hardRules: string[]
+  /** Rules that only govern buying. Anything already in the closet has passed these. */
+  purchaseRules?: string[]
+  /** Minimum trouser rise, in inches. Used when judging a potential purchase. */
   minRise?: number
   colorPalette?: string[]
 }

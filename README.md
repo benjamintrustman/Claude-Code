@@ -74,8 +74,9 @@ Screen."
 - **Today** — weather for your location, an occasion picker, and 3 suggested
   outfits built from your logged closet.
 - **Closet** — your full inventory, filterable by category, with edit/delete.
-  Trousers below a profile's minimum rise are flagged and excluded from
-  suggestions.
+  Everything you own is fair game for suggestions; owning it means it already
+  works. Rise is recorded for reference and only enforced when judging a
+  potential purchase on the Gaps screen.
 - **Add** — a plain form to log a new piece (no photo recognition — you type
   what it is).
 - **Gaps** — a running list of things you're hunting for, plus a "check this

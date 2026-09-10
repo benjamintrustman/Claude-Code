@@ -3,7 +3,7 @@ import type { Category, Item } from '../types'
 import { CATEGORIES } from '../types'
 import { useApp } from '../context/AppContext'
 import { ItemForm } from '../components/ItemForm'
-import { AlertIcon, CloseIcon } from '../components/icons'
+import { CloseIcon } from '../components/icons'
 
 export function Closet() {
   const { closet, profile, deleteItem, updateItem, resetToSeed } = useApp()
@@ -20,15 +20,6 @@ export function Closet() {
     () => (filter === 'All' ? closet : closet.filter((it) => it.category === filter)),
     [closet, filter],
   )
-
-  function isRiseFlagged(it: Item) {
-    return (
-      it.category === 'Trousers' &&
-      profile.minRise != null &&
-      it.rise != null &&
-      it.rise < profile.minRise
-    )
-  }
 
   return (
     <div className="mx-auto w-full max-w-md flex-1 px-4 py-5">
@@ -55,7 +46,6 @@ export function Closet() {
       ) : (
         <ul className="flex flex-col gap-2.5">
           {visible.map((it) => {
-            const flagged = isRiseFlagged(it)
             return (
               <li key={it.id}>
                 <button
@@ -82,12 +72,6 @@ export function Closet() {
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
-                    {flagged && (
-                      <span className="flex items-center gap-1 rounded-full bg-clay-bg px-2 py-0.5 text-[11px] font-medium text-clay">
-                        <AlertIcon className="h-3 w-3" />
-                        Low rise
-                      </span>
-                    )}
                     {it.functional && (
                       <span className="rounded-full bg-paper-dim px-2 py-0.5 text-[11px] text-ink-soft">
                         Functional

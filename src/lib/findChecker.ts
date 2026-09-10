@@ -18,7 +18,10 @@ export class FindCheckError extends Error {}
 const VERDICT_TYPES: FindVerdictType[] = ['fills_gap', 'redundant', 'violates_rule', 'no_gap']
 
 function buildSystemPrompt(profile: ProfileConfig, gaps: Gap[], closet: Item[]): string {
-  const rules = profile.hardRules.map((r) => `- ${r}`).join('\n')
+  // Buying rules apply here and only here — the closet is already vetted.
+  const rules = [...profile.hardRules, ...(profile.purchaseRules ?? [])]
+    .map((r) => `- ${r}`)
+    .join('\n')
   const palette = profile.colorPalette
     ? `\n\nPreferred color palette: ${profile.colorPalette.join(', ')}`
     : ''
