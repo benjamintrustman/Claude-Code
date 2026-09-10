@@ -106,7 +106,7 @@ export function Closet() {
           onClick={() => {
             if (
               window.confirm(
-                `Reset ${profile.name}'s closet and gap list to the original seed data? This discards any edits.`,
+                `Restore ${profile.name}'s original closet and gap list?\n\nThis permanently discards every item you have added, edited or deleted since, and every change to the gap list. It cannot be undone.`,
               )
             ) {
               resetToSeed()
@@ -114,7 +114,7 @@ export function Closet() {
           }}
           className="text-xs text-ink-soft underline decoration-line underline-offset-2 hover:text-clay"
         >
-          Reset {profile.name}'s data to seed
+          Restore {profile.name}'s original closet &amp; gaps
         </button>
       </div>
     </div>
