@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { Item, ProfileConfig } from '../types'
+import type { Category, Item, ProfileConfig } from '../types'
 import type { CurrentWeather } from './weather'
 import { weatherCodeInfo } from './weatherCodes'
 import { MissingApiKeyError, getClient } from './anthropicClient'
@@ -14,6 +14,33 @@ export type ValidatedPiece = OutfitPiece & { valid: boolean }
 export type ValidatedOutfit = { title: string; why: string; pieces: ValidatedPiece[] }
 
 export class OutfitApiError extends Error {}
+
+// The order pieces are read in: bottoms, base layer, shirt, knit, shoes,
+// jacket, accessories. Sorted here rather than asked for in the prompt, so
+// every card reads the same way no matter what order the model returns.
+const CATEGORY_ORDER: Category[] = [
+  'Trousers',
+  'Skirt',
+  'Basics/Tee',
+  'Shirt',
+  'Dress/Top',
+  'Knitwear',
+  'Footwear',
+  'Overshirt',
+  'Outerwear',
+  'Belt',
+  'Bag',
+]
+
+function orderPieces(pieces: ValidatedPiece[], closet: Item[]): ValidatedPiece[] {
+  const rank = new Map(CATEGORY_ORDER.map((c, i) => [c as string, i]))
+  const byName = new Map(closet.map((it) => [it.name, it]))
+  // Prefer the closet's own category over whatever the model labelled it.
+  const categoryOf = (p: ValidatedPiece) => byName.get(p.item)?.category ?? p.category
+  return [...pieces]
+    .map((p) => ({ ...p, category: categoryOf(p) }))
+    .sort((a, b) => (rank.get(a.category) ?? 99) - (rank.get(b.category) ?? 99))
+}
 
 // Anything in the closet is fair game — owning it means it already works. The
 // rise minimum is a buying rule, applied by the find checker, not here.
@@ -99,23 +126,29 @@ function shuffle<T>(items: T[]): T[] {
   return a
 }
 
-// The prompt is otherwise byte-identical run to run, and this model takes no
-// temperature, so the spotlight is where run-to-run variation comes from:
-// a different random handful of neglected pieces each time.
-//
-// Bottoms get their own quota. Sampled from the closet at large they are a
-// fifth of it, which is not enough pressure to break the habit of reaching for
-// the same couple of trousers.
-function spotlightPieces(closet: Item[], recentlyUsed: Set<string>): Item[] {
-  const pick = (items: Item[], count: number) => {
-    const neglected = items.filter((it) => !recentlyUsed.has(it.name))
-    return shuffle(neglected.length >= count ? neglected : items).slice(0, count)
+const isBottom = (it: Item) => it.category === 'Trousers' || it.category === 'Skirt'
+
+function pickNeglected(items: Item[], recentlyUsed: Set<string>, count: number): Item[] {
+  const neglected = items.filter((it) => !recentlyUsed.has(it.name))
+  const chosen = shuffle(neglected).slice(0, count)
+  if (chosen.length < count) {
+    const used = new Set(chosen.map((c) => c.id))
+    chosen.push(...shuffle(items.filter((it) => !used.has(it.id))).slice(0, count - chosen.length))
   }
-  const isBottom = (it: Item) => it.category === 'Trousers' || it.category === 'Skirt'
-  return [
-    ...pick(closet.filter(isBottom), 4),
-    ...pick(closet.filter((it) => !isBottom(it)), 6),
-  ]
+  return chosen
+}
+
+// Asking nicely for variety didn't work: the model kept returning its two or
+// three favourite trousers. So the app now picks the bottoms itself, rotating
+// through the ones it hasn't shown lately, and the model styles around them.
+function assignBottoms(closet: Item[], recentlyUsed: Set<string>): Item[] {
+  return pickNeglected(closet.filter(isBottom), recentlyUsed, 3)
+}
+
+// The prompt is otherwise byte-identical run to run, and this model takes no
+// temperature, so the spotlight is where run-to-run variation comes from.
+function spotlightPieces(closet: Item[], recentlyUsed: Set<string>): Item[] {
+  return pickNeglected(closet.filter((it) => !isBottom(it)), recentlyUsed, 6)
 }
 
 function buildUserPrompt(
@@ -128,6 +161,9 @@ function buildUserPrompt(
     .map((it) => `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})`)
     .join('\n')
   const recentlyUsed = recentlyUsedNames(recent)
+  const bottoms = assignBottoms(closet, recentlyUsed)
+    .map((it, i) => `- Outfit ${i + 1}: ${it.name}`)
+    .join('\n')
   const spotlight = spotlightPieces(closet, recentlyUsed)
     .map((it) => `- ${it.name}`)
     .join('\n')
@@ -151,7 +187,11 @@ Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, h
 
 Occasion: ${occasion}
 ${recentBlock}
-Pieces that haven't come up recently — build at least two of the three outfits around something from this list, and take your bottoms from it wherever the weather and occasion allow. Skip a piece only if it genuinely doesn't suit today:
+Bottoms are assigned — build each outfit around the one named here, rotating the wardrobe rather than reaching for favourites:
+${bottoms}
+If an assigned bottom genuinely cannot work today (too warm, too formal, wrong for rain), substitute the nearest alternative and say why in that outfit's "why". Do that at most once across the three.
+
+Other pieces that haven't come up recently — work at least two of them in, unless they truly don't suit today:
 ${spotlight}
 
 Suggest 3 outfits.`
@@ -253,7 +293,10 @@ export async function suggestOutfits(
   const validated = parsed.map((outfit) => ({
     title: outfit.title,
     why: outfit.why,
-    pieces: outfit.pieces.map((p) => ({ ...p, valid: closetNames.has(p.item) })),
+    pieces: orderPieces(
+      outfit.pieces.map((p) => ({ ...p, valid: closetNames.has(p.item) })),
+      closet,
+    ),
   }))
 
   recordOutfits(profile.id, validated)
