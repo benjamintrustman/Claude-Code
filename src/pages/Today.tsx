@@ -8,7 +8,7 @@ import { LocationModal } from '../components/LocationModal'
 import { OutfitCard } from '../components/OutfitCard'
 import { AlertIcon } from '../components/icons'
 
-const OCCASIONS = ['Work', 'Weekend', 'Errands', 'Dinner out', 'Travel', 'Outdoors']
+const OCCASIONS = ['Work', 'Casual day', 'Weekend', 'Errands', 'Dinner out', 'Travel']
 
 export function Today() {
   const { closet, profile } = useApp()
