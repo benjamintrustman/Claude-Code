@@ -7,12 +7,11 @@ import { WeatherCard } from '../components/WeatherCard'
 import { LocationModal } from '../components/LocationModal'
 import { OutfitCard } from '../components/OutfitCard'
 import { AlertIcon } from '../components/icons'
-
-const OCCASIONS = ['Work', 'Casual day', 'Weekend', 'Errands', 'Dinner out', 'Travel']
+import { OCCASIONS } from '../data/occasions'
 
 export function Today() {
   const { closet, profile } = useApp()
-  const [occasion, setOccasion] = useState(OCCASIONS[0])
+  const [occasion, setOccasion] = useState(OCCASIONS[0].label)
   const [editingLocation, setEditingLocation] = useState(false)
   const { location, status: locationStatus, notice, setManualLocation, useDeviceLocationInstead } =
     useLocation()
@@ -50,16 +49,17 @@ export function Today() {
         <div className="flex flex-wrap gap-2">
           {OCCASIONS.map((o) => (
             <button
-              key={o}
+              key={o.label}
               type="button"
-              onClick={() => setOccasion(o)}
+              onClick={() => setOccasion(o.label)}
+              title={o.description}
               className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
-                occasion === o
+                occasion === o.label
                   ? 'border-ink bg-ink text-paper'
                   : 'border-line text-ink-soft hover:border-tobacco/50 hover:text-ink'
               }`}
             >
-              {o}
+              {o.label}
             </button>
           ))}
         </div>

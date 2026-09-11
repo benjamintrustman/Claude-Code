@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import type { Category, Item, ProfileConfig } from '../types'
 import type { CurrentWeather } from './weather'
 import { weatherCodeInfo } from './weatherCodes'
+import { occasionDescription } from '../data/occasions'
 import { MissingApiKeyError, getClient } from './anthropicClient'
 import type { RecentOutfit } from './outfitHistory'
 import { loadRecentOutfits, recentlyUsedNames, recordOutfits } from './outfitHistory'
@@ -277,7 +278,7 @@ Today's range: low ${Math.round(weather.low)}°F to high ${Math.round(weather.hi
 
 Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, hour)}
 
-Occasion: ${occasion}
+Occasion: ${occasion}${occasionDescription(occasion) ? ` — ${occasionDescription(occasion)}` : ''}
 ${recentBlock}
 Build these two outfits around the bottom named, so the wardrobe rotates rather than repeating:
 ${bottoms}
