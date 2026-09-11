@@ -10,9 +10,22 @@ import { loadRecentOutfits, recentlyUsedNames, recordOutfits } from './outfitHis
 const MODEL = 'claude-sonnet-5'
 
 export type OutfitPiece = { category: string; item: string }
-export type OutfitSuggestion = { title: string; pieces: OutfitPiece[]; why: string }
+/** An alternative for one slot of an outfit — the shirt, knit, jacket or shoes. */
+export type OutfitSwap = { replaces: string; item: string; note: string }
+export type OutfitSuggestion = {
+  title: string
+  pieces: OutfitPiece[]
+  why: string
+  swaps?: OutfitSwap[]
+}
 export type ValidatedPiece = OutfitPiece & { valid: boolean }
-export type ValidatedOutfit = { title: string; why: string; pieces: ValidatedPiece[] }
+export type ValidatedSwap = { replaces: string; item: string; note: string; category: string }
+export type ValidatedOutfit = {
+  title: string
+  why: string
+  pieces: ValidatedPiece[]
+  swaps: ValidatedSwap[]
+}
 /** `bottomsOffered` is surfaced in the UI so the rotation is visible, not a claim. */
 export type OutfitResult = { outfits: ValidatedOutfit[]; bottomsOffered: string[] }
 
@@ -117,6 +130,34 @@ function resolvePieces(pieces: OutfitPiece[], closet: Item[]): ValidatedPiece[] 
     .sort((a, b) => (rank.get(a.category) ?? 99) - (rank.get(b.category) ?? 99))
 }
 
+/** Both ends of a swap have to be real, or it's not offerable. */
+function resolveSwaps(
+  swaps: OutfitSwap[] | undefined,
+  pieces: ValidatedPiece[],
+  closet: Item[],
+): ValidatedSwap[] {
+  if (!Array.isArray(swaps)) return []
+  const inOutfit = new Set(pieces.filter((p) => p.valid).map((p) => p.item))
+
+  return swaps.flatMap((s) => {
+    if (typeof s?.replaces !== 'string' || typeof s?.item !== 'string') return []
+    const target = resolveItem(s.replaces, closet)
+    const replacement = resolveItem(s.item, closet)
+    if (!target || !replacement) return []
+    // A swap for a slot this outfit doesn't have is meaningless.
+    if (!inOutfit.has(target.name)) return []
+    if (target.name === replacement.name) return []
+    return [
+      {
+        replaces: target.name,
+        item: replacement.name,
+        category: replacement.category as string,
+        note: typeof s.note === 'string' ? s.note : '',
+      },
+    ]
+  })
+}
+
 // Anything in the closet is fair game — owning it means it already works. The
 // rise minimum is a buying rule, applied by the find checker, not here.
 // Functional pieces stay out: they're chosen for utility, not for a look.
@@ -138,9 +179,11 @@ User's aesthetic: ${profile.aesthetic}${rules}${palette}
 Every piece in this closet already meets the user's standards for fit, rise, and silhouette — they own it, so it passed. Never skip a piece because you cannot tell from its name whether it complies with some rule, and never limit yourself to the items whose names happen to state their cut. Treat the whole closet as equally wearable and judge only on colour, texture, formality, and weather.
 
 Respond with ONLY a JSON array of exactly 3 outfits — no prose before or after, no markdown code fences. Each outfit object must have this exact shape:
-{"title": "short punchy name", "pieces": [{"category": "Outerwear", "item": "exact item name from the closet list"}], "why": "one sentence on why this works for today's conditions"}
+{"title": "short punchy name", "pieces": [{"category": "Outerwear", "item": "exact item name from the closet list"}], "why": "one sentence on why this works for today's conditions", "swaps": [{"replaces": "exact name of a piece in this outfit", "item": "exact name of the alternative from the closet", "note": "when you would choose it instead"}]}
 
 The "item" value must be copied verbatim from the closet list below — do not paraphrase, abbreviate, or invent items. Each of the 3 outfits should be a complete, wearable look appropriate for the occasion and today's weather.
+
+Give each outfit 2 to 4 swaps: single-piece alternatives that keep the look intact. Only for the shirt, base layer, knitwear, overshirt, outerwear and footwear slots — never the trouser or skirt, which anchors the outfit. Each swap must name a piece actually used in that outfit as "replaces", and its "note" should be a short, concrete reason to reach for it instead ("warmer if it turns", "dressier for the evening", "quieter against the print") rather than a restatement of what it is.
 
 The three must be genuinely different, not variations on one idea: all three must use a DIFFERENT bottom (trouser or skirt), no two may share more than one piece, and they must not all use the same outerwear. Reach for different silhouettes and different corners of the closet. A wardrobe this size has many workable answers — a correct-but-predictable set of three is a worse response than three that each open up a different piece.`
 }
@@ -385,11 +428,15 @@ export async function suggestOutfits(
     throw new OutfitApiError('The model returned an unexpected response shape.')
   }
 
-  const validated = parsed.map((outfit) => ({
-    title: outfit.title,
-    why: outfit.why,
-    pieces: resolvePieces(outfit.pieces, closet),
-  }))
+  const validated = parsed.map((outfit) => {
+    const pieces = resolvePieces(outfit.pieces, closet)
+    return {
+      title: outfit.title,
+      why: outfit.why,
+      pieces,
+      swaps: resolveSwaps(outfit.swaps, pieces, closet),
+    }
+  })
 
   recordOutfits(profile.id, validated)
   return { outfits: validated, bottomsOffered: offered.map((it) => it.name) }
