@@ -140,6 +140,7 @@ export function parseTransfer(text: string): ParsedTransfer {
       brand: typeof row.brand === 'string' && row.brand.trim() ? row.brand.trim() : undefined,
       rise: category === 'Trousers' ? rise : undefined,
       functional: row.functional === true,
+      note: typeof row.note === 'string' && row.note.trim() ? row.note.trim() : undefined,
       photo: typeof row.photo === 'string' && row.photo.startsWith('data:') ? row.photo : undefined,
     })
   })

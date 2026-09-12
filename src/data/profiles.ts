@@ -39,6 +39,13 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'pink',
       'emerald/kelly green',
     ],
+    knownGoodLooks: [
+      'Wide-leg jeans + white tee + olive cardigan (the casual go-to)',
+      'Wide-leg jeans + white tee + camel Ganni jacket + orange Salomon XT-Whisper',
+      'Black wool trousers + cream muscle tank + copper Rosa Mosa mules',
+      'Dark navy blazer + dark indigo denim jacket over dark olive tank + mustard/navy ikat skirt',
+      'Brown/taupe Jeanerica flares + fitted tank or tee + copper Rosa Mosa mules',
+    ],
   },
 }
 

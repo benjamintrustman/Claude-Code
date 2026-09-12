@@ -34,6 +34,9 @@ export type Item = {
   rise?: number // trousers only, inches
   functional?: boolean // excluded from style suggestions (e.g. a technical puffer)
   photo?: string // optional base64/blob
+  /** How this specific piece wants to be worn — "fitted tops only, no tuck",
+   *  "statement shoe", "works best with simpler outfits". Passed to the model. */
+  note?: string
 }
 
 export type GapPriority = 'low' | 'medium' | 'high'
@@ -67,4 +70,7 @@ export type ProfileConfig = {
   /** Minimum trouser rise, in inches. Used when judging a potential purchase. */
   minRise?: number
   colorPalette?: string[]
+  /** Combinations this person is known to actually wear. Evidence of taste,
+   *  far more useful to the model than an adjective like "boho". */
+  knownGoodLooks?: string[]
 }

@@ -172,9 +172,19 @@ function buildSystemPrompt(profile: ProfileConfig): string {
   const palette = profile.colorPalette
     ? `\n\nPreferred color palette: ${profile.colorPalette.join(', ')}`
     : ''
+  // Real combinations beat adjectives: they show how this person actually
+  // balances proportion and colour. Framed as evidence, not templates, so the
+  // model reasons from them rather than replaying them back.
+  const looks = profile.knownGoodLooks?.length
+    ? `\n\nCombinations this person is known to wear and like:\n${profile.knownGoodLooks
+        .map((l) => `- ${l}`)
+        .join(
+          '\n',
+        )}\nTreat these as evidence of what works for them — the proportions, the colour pairings, the level of polish. Do not simply repeat them back; use them to judge whether something new is in character.`
+    : ''
   return `You are a personal styling assistant for a wardrobe app called Fit Check. Suggest outfits built ONLY from clothes the user already owns — never invent or substitute items.
 
-User's aesthetic: ${profile.aesthetic}${rules}${palette}
+User's aesthetic: ${profile.aesthetic}${rules}${palette}${looks}
 
 Every piece in this closet already meets the user's standards for fit, rise, and silhouette — they own it, so it passed. Never skip a piece because you cannot tell from its name whether it complies with some rule, and never limit yourself to the items whose names happen to state their cut. Treat the whole closet as equally wearable and judge only on colour, texture, formality, and weather.
 
@@ -297,7 +307,12 @@ function buildUserPrompt(
   // reaching for a favourite is not an option the model has.
   const closetLines = closet
     .filter((it) => !isBottom(it) || offeredIds.has(it.id))
-    .map((it) => `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})`)
+    .map(
+      (it) =>
+        `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})${
+          it.note ? ` — ${it.note}` : ''
+        }`,
+    )
     .join('\n')
   const bottoms = assigned.map((it, i) => `- Outfit ${i + 1}: ${it.name}`).join('\n')
   const spotlight = spotlightPieces(closet, recentlyUsed)

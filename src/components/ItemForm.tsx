@@ -111,6 +111,19 @@ export function ItemForm({
         />
       </Field>
 
+      <Field label="Styling note (optional)">
+        <input
+          type="text"
+          value={values.note ?? ''}
+          onChange={(e) => set('note', e.target.value)}
+          placeholder="e.g. fitted tops only, no tuck"
+          className={inputClass}
+        />
+        <p className="mt-1.5 text-sm text-ink-soft">
+          How this piece wants to be worn. Passed to the suggestions.
+        </p>
+      </Field>
+
       {isTrousers && (
         <Field label="Rise (inches)">
           <input

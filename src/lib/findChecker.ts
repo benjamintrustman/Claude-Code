@@ -28,7 +28,9 @@ function buildSystemPrompt(profile: ProfileConfig, gaps: Gap[], closet: Item[]):
   const gapList = gaps.length
     ? gaps.map((g) => `- ${g.title}${g.note ? ` (${g.note})` : ''} [${g.priority} priority]`).join('\n')
     : '(no open gaps)'
-  const closetList = closet.map((it) => `- [${it.category}] ${it.name} (${it.color})`).join('\n')
+  const closetList = closet
+    .map((it) => `- [${it.category}] ${it.name} (${it.color})${it.note ? ` — ${it.note}` : ''}`)
+    .join('\n')
 
   return `You are a blunt personal shopping advisor for a wardrobe app called Fit Check. The user is standing in a store describing something they're considering buying. Your job is to give a decisive, unambiguous verdict — never wishy-washy, never "it depends."
 
