@@ -13,11 +13,17 @@ export function useOutfits() {
   const [error, setError] = useState<string | null>(null)
 
   const generate = useCallback(
-    async (closet: Item[], profile: ProfileConfig, weather: CurrentWeather, occasion: string) => {
+    async (
+      closet: Item[],
+      profile: ProfileConfig,
+      weather: CurrentWeather,
+      occasion: string,
+      anchor?: Item,
+    ) => {
       setStatus('loading')
       setError(null)
       try {
-        const result = await suggestOutfits(closet, profile, weather, occasion)
+        const result = await suggestOutfits(closet, profile, weather, occasion, anchor)
         setOutfits(result.outfits)
         setBottomsOffered(result.bottomsOffered)
         setStatus('ready')

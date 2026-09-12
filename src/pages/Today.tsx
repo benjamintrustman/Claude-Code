@@ -6,10 +6,17 @@ import { useApp } from '../context/AppContext'
 import { WeatherCard } from '../components/WeatherCard'
 import { LocationModal } from '../components/LocationModal'
 import { OutfitCard } from '../components/OutfitCard'
-import { AlertIcon } from '../components/icons'
+import { AlertIcon, CloseIcon } from '../components/icons'
 import { OCCASIONS } from '../data/occasions'
+import type { Item } from '../types'
 
-export function Today() {
+export function Today({
+  anchor,
+  onClearAnchor,
+}: {
+  anchor: Item | null
+  onClearAnchor: () => void
+}) {
   const { closet, profile } = useApp()
   const [occasion, setOccasion] = useState(OCCASIONS[0].label)
   const [editingLocation, setEditingLocation] = useState(false)
@@ -44,6 +51,25 @@ export function Today() {
         onRetryWeather={retry}
       />
 
+      {anchor && (
+        <div className="mb-6 flex items-start gap-2 rounded-xl border border-tobacco/40 bg-tobacco/5 px-3.5 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium tracking-wide text-tobacco-dark uppercase">
+              Building around
+            </p>
+            <p className="mt-0.5 text-sm text-ink">{anchor.name}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClearAnchor}
+            aria-label="Stop building around this item"
+            className="shrink-0 text-ink-soft hover:text-ink"
+          >
+            <CloseIcon className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <section className="mb-6">
         <h3 className="mb-2 text-sm font-medium text-ink-soft">Occasion</h3>
         <div className="flex flex-wrap gap-2">
@@ -68,10 +94,14 @@ export function Today() {
       <button
         type="button"
         disabled={!canSuggest || outfitsStatus === 'loading'}
-        onClick={() => weather && generate(closet, profile, weather, occasion)}
+        onClick={() => weather && generate(closet, profile, weather, occasion, anchor ?? undefined)}
         className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        {outfitsStatus === 'loading' ? 'Thinking…' : 'Suggest outfits'}
+        {outfitsStatus === 'loading'
+          ? 'Thinking…'
+          : anchor
+            ? 'Build outfits around this'
+            : 'Suggest outfits'}
       </button>
 
       {outfitsStatus === 'error' && outfitsError && (
@@ -86,11 +116,13 @@ export function Today() {
           {outfits.map((outfit, i) => (
             <OutfitCard key={i} outfit={outfit} />
           ))}
-          {bottomsOffered.length > 0 && (
-            <p className="px-1 pt-1 text-xs leading-relaxed text-ink-soft">
-              <span className="font-medium">Today's rotation:</span> {bottomsOffered.join(' · ')}
-            </p>
-          )}
+          {/* Meaningless when the anchor is itself the bottom — nothing rotated. */}
+          {bottomsOffered.length > 0 &&
+            !(anchor?.category === 'Trousers' || anchor?.category === 'Skirt') && (
+              <p className="px-1 pt-1 text-xs leading-relaxed text-ink-soft">
+                <span className="font-medium">Today's rotation:</span> {bottomsOffered.join(' · ')}
+              </p>
+            )}
         </div>
       )}
 

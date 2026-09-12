@@ -6,7 +6,7 @@ import { ItemForm } from '../components/ItemForm'
 import { TransferModal } from '../components/TransferModal'
 import { CloseIcon } from '../components/icons'
 
-export function Closet() {
+export function Closet({ onBuildAround }: { onBuildAround: (item: Item) => void }) {
   const { closet, profile, gaps, addItem, addGap, replaceCloset, deleteItem, updateItem, resetToSeed } =
     useApp()
   const [filter, setFilter] = useState<Category | 'All'>('All')
@@ -100,6 +100,10 @@ export function Closet() {
             deleteItem(editing.id)
             setEditing(null)
           }}
+          onBuildAround={() => {
+            onBuildAround(editing)
+            setEditing(null)
+          }}
         />
       )}
 
@@ -189,21 +193,32 @@ function EditModal({
   onClose,
   onSave,
   onDelete,
+  onBuildAround,
 }: {
   item: Item
   onClose: () => void
   onSave: (values: Omit<Item, 'id'>) => void
   onDelete: () => void
+  onBuildAround: () => void
 }) {
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center bg-ink/40 sm:items-center">
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-line bg-paper p-5 sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-serif text-xl font-semibold text-ink">Edit item</h3>
-          <button type="button" onClick={onClose} className="text-ink-soft hover:text-ink">
+          <h3 className="truncate pr-3 font-serif text-xl font-semibold text-ink">{item.name}</h3>
+          <button type="button" onClick={onClose} className="shrink-0 text-ink-soft hover:text-ink">
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={onBuildAround}
+          className="mb-5 w-full rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-opacity hover:opacity-90"
+        >
+          Build an outfit around this
+        </button>
+
         <ItemForm initial={item} submitLabel="Save changes" onSubmit={onSave} onCancel={onClose} />
         <button
           type="button"

@@ -165,7 +165,7 @@ export function eligibleCloset(closet: Item[]): Item[] {
   return closet.filter((it) => !it.functional)
 }
 
-function buildSystemPrompt(profile: ProfileConfig): string {
+function buildSystemPrompt(profile: ProfileConfig, anchoredBottom: boolean): string {
   const rules = profile.hardRules.length
     ? `\n\nHard rules (never violate these):\n${profile.hardRules.map((r) => `- ${r}`).join('\n')}`
     : ''
@@ -195,7 +195,11 @@ The "item" value must be copied verbatim from the closet list below — do not p
 
 Give each outfit 2 to 4 swaps: single-piece alternatives that keep the look intact. Offer them for any slot EXCEPT the bottom — the trouser or skirt anchors the outfit and never changes. Tops, layers, outerwear, footwear and accessories are all fair game, and the top is usually the most useful one to offer. Each swap must name a piece actually used in that outfit as "replaces", and its "note" should be a short, concrete reason to reach for it instead ("warmer if it turns", "dressier for the evening", "quieter against the print") rather than a restatement of what it is.
 
-The three must be genuinely different, not variations on one idea: all three must use a DIFFERENT bottom (trouser or skirt), no two may share more than one piece, and they must not all use the same outerwear. Reach for different silhouettes and different corners of the closet. A wardrobe this size has many workable answers — a correct-but-predictable set of three is a worse response than three that each open up a different piece.`
+The three must be genuinely different, not variations on one idea: ${
+    anchoredBottom
+      ? 'they share the one bottom the user asked to wear, so everything above it has to change — different tops, different layers, different shoes, different levels of polish'
+      : 'all three must use a DIFFERENT bottom (trouser or skirt), no two may share more than one piece, and they must not all use the same outerwear'
+  }. Reach for different silhouettes and different corners of the closet. A wardrobe this size has many workable answers — a correct-but-predictable set of three is a worse response than three that each open up a different piece.`
 }
 
 // The local clock where the weather is, not where the browser is — a manually
@@ -299,14 +303,17 @@ function buildUserPrompt(
   recent: RecentOutfit[],
   offered: Item[],
   assigned: Item[],
+  anchor?: Item,
 ): string {
   const recentlyUsed = recentlyUsedNames(recent)
   const offeredIds = new Set(offered.map((it) => it.id))
 
   // Bottoms outside today's rotation are withheld from the list entirely, so
-  // reaching for a favourite is not an option the model has.
+  // reaching for a favourite is not an option the model has. An anchor is
+  // always kept, or asking to build around a resting trouser would silently
+  // remove the very piece the request is about.
   const closetLines = closet
-    .filter((it) => !isBottom(it) || offeredIds.has(it.id))
+    .filter((it) => it.id === anchor?.id || !isBottom(it) || offeredIds.has(it.id))
     .map(
       (it) =>
         `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})${
@@ -337,11 +344,26 @@ Today's range: low ${Math.round(weather.low)}°F to high ${Math.round(weather.hi
 Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, hour)}
 
 Occasion: ${occasion}${occasionDescription(occasion) ? ` — ${occasionDescription(occasion)}` : ''}
-${recentBlock}
+${recentBlock}${
+    anchor
+      ? `
+The user wants to wear the ${anchor.name} today. All three outfits must include it, and each should build a genuinely different look around it rather than changing one piece between them.${
+          isBottom(anchor)
+            ? ' It is the bottom for all three, so vary the top half, the layers and the shoes.'
+            : ''
+        }
+`
+      : ''
+  }${
+    // The bottom rotation still applies unless the anchor is itself the bottom.
+    anchor && isBottom(anchor)
+      ? ''
+      : `
 Build these two outfits around the bottom named, so the wardrobe rotates rather than repeating:
 ${bottoms}
 The third outfit takes whichever remaining bottom from the closet list above suits it best. All three must use a different bottom.
-
+`
+  }
 Other pieces that haven't come up recently — work at least two of them in, unless they truly don't suit today:
 ${spotlight}
 
@@ -372,6 +394,7 @@ export async function suggestOutfits(
   profile: ProfileConfig,
   weather: CurrentWeather,
   occasion: string,
+  anchor?: Item,
 ): Promise<OutfitResult> {
   const eligible = eligibleCloset(closet)
   if (eligible.length === 0) {
@@ -390,11 +413,11 @@ export async function suggestOutfits(
       model: MODEL,
       max_tokens: 16000,
       output_config: { effort: 'medium' },
-      system: buildSystemPrompt(profile),
+      system: buildSystemPrompt(profile, anchor != null && isBottom(anchor)),
       messages: [
         {
           role: 'user',
-          content: buildUserPrompt(eligible, weather, occasion, recent, offered, assigned),
+          content: buildUserPrompt(eligible, weather, occasion, recent, offered, assigned, anchor),
         },
       ],
     })
