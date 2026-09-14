@@ -22,10 +22,13 @@ export function Today({
   const [editingLocation, setEditingLocation] = useState(false)
   const { location, status: locationStatus, notice, setManualLocation, useDeviceLocationInstead } =
     useLocation()
-  const { data: weather, status: weatherStatus, error: weatherError, retry } = useWeather(
-    location.lat,
-    location.lon,
-  )
+  const {
+    data: weather,
+    status: weatherStatus,
+    error: weatherError,
+    retry,
+    ensureFresh,
+  } = useWeather(location.lat, location.lon)
   const {
     outfits,
     bottomsOffered,
@@ -94,7 +97,12 @@ export function Today({
       <button
         type="button"
         disabled={!canSuggest || outfitsStatus === 'loading'}
-        onClick={() => weather && generate(closet, profile, weather, occasion, anchor ?? undefined)}
+        onClick={async () => {
+          // Never build on what's on screen — it may be days old if the app
+          // has been sitting open. Refetch first if the reading has aged out.
+          const current = await ensureFresh()
+          if (current) generate(closet, profile, current, occasion, anchor ?? undefined)
+        }}
         className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {outfitsStatus === 'loading'
