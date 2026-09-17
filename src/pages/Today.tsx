@@ -11,11 +11,13 @@ import { OCCASIONS } from '../data/occasions'
 import type { Item } from '../types'
 
 export function Today({
-  anchor,
-  onClearAnchor,
+  anchors,
+  onRemoveAnchor,
+  onClearAnchors,
 }: {
-  anchor: Item | null
-  onClearAnchor: () => void
+  anchors: Item[]
+  onRemoveAnchor: (id: string) => void
+  onClearAnchors: () => void
 }) {
   const { closet, profile } = useApp()
   const [occasion, setOccasion] = useState(OCCASIONS[0].label)
@@ -54,22 +56,36 @@ export function Today({
         onRetryWeather={retry}
       />
 
-      {anchor && (
-        <div className="mb-6 flex items-start gap-2 rounded-xl border border-tobacco/40 bg-tobacco/5 px-3.5 py-3">
-          <div className="min-w-0 flex-1">
+      {anchors.length > 0 && (
+        <div className="mb-6 rounded-xl border border-tobacco/40 bg-tobacco/5 px-3.5 py-3">
+          <div className="mb-2 flex items-baseline justify-between gap-2">
             <p className="text-xs font-medium tracking-wide text-tobacco-dark uppercase">
               Building around
             </p>
-            <p className="mt-0.5 text-sm text-ink">{anchor.name}</p>
+            <button
+              type="button"
+              onClick={onClearAnchors}
+              className="shrink-0 text-xs text-ink-soft underline decoration-line underline-offset-2 hover:text-ink"
+            >
+              Clear all
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClearAnchor}
-            aria-label="Stop building around this item"
-            className="shrink-0 text-ink-soft hover:text-ink"
-          >
-            <CloseIcon className="h-4 w-4" />
-          </button>
+          <ul className="flex flex-col gap-1.5">
+            {anchors.map((item) => (
+              <li key={item.id} className="flex items-start gap-2">
+                <span className="w-20 shrink-0 text-xs text-ink-soft">{item.category}</span>
+                <span className="min-w-0 flex-1 text-sm text-ink">{item.name}</span>
+                <button
+                  type="button"
+                  onClick={() => onRemoveAnchor(item.id)}
+                  aria-label={`Remove ${item.name}`}
+                  className="shrink-0 text-ink-soft hover:text-clay"
+                >
+                  <CloseIcon className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -101,14 +117,14 @@ export function Today({
           // Never build on what's on screen — it may be days old if the app
           // has been sitting open. Refetch first if the reading has aged out.
           const current = await ensureFresh()
-          if (current) generate(closet, profile, current, occasion, anchor ?? undefined)
+          if (current) generate(closet, profile, current, occasion, anchors)
         }}
         className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {outfitsStatus === 'loading'
           ? 'Thinking…'
-          : anchor
-            ? 'Build outfits around this'
+          : anchors.length
+            ? `Build outfits around ${anchors.length === 1 ? 'this' : `these ${anchors.length}`}`
             : 'Suggest outfits'}
       </button>
 
@@ -124,9 +140,9 @@ export function Today({
           {outfits.map((outfit, i) => (
             <OutfitCard key={i} outfit={outfit} />
           ))}
-          {/* Meaningless when the anchor is itself the bottom — nothing rotated. */}
+          {/* Meaningless when a pinned piece is the bottom — nothing rotated. */}
           {bottomsOffered.length > 0 &&
-            !(anchor?.category === 'Trousers' || anchor?.category === 'Skirt') && (
+            !anchors.some((a) => a.category === 'Trousers' || a.category === 'Skirt') && (
               <p className="px-1 pt-1 text-xs leading-relaxed text-ink-soft">
                 <span className="font-medium">Today's rotation:</span> {bottomsOffered.join(' · ')}
               </p>

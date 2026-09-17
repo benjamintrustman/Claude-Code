@@ -296,6 +296,22 @@ function spotlightPieces(closet: Item[], recentlyUsed: Set<string>): Item[] {
   return pickNeglected(closet.filter((it) => !isBottom(it)), recentlyUsed, 6)
 }
 
+// Telling the model to vary the shoes when the shoes are pinned is a
+// contradiction it has to resolve on its own. Name only the axes still free.
+const LAYER_CATEGORIES: Category[] = ['Outerwear', 'Knitwear', 'Overshirt']
+const TOP_CATEGORIES: Category[] = ['Shirt', 'Basics/Tee', 'Dress/Top']
+
+function variationAxes(anchors: Item[]): string {
+  const pinned = new Set(anchors.map((it) => it.category))
+  const free = (group: Category[]) => !group.some((c) => pinned.has(c))
+  const axes: string[] = []
+  if (free(LAYER_CATEGORIES)) axes.push('different layers')
+  if (free(TOP_CATEGORIES)) axes.push('different shirts')
+  if (free(['Footwear'])) axes.push('different shoes')
+  axes.push('different levels of polish')
+  return axes.join(', ')
+}
+
 function buildUserPrompt(
   closet: Item[],
   weather: CurrentWeather,
@@ -303,17 +319,19 @@ function buildUserPrompt(
   recent: RecentOutfit[],
   offered: Item[],
   assigned: Item[],
-  anchor?: Item,
+  anchors: Item[],
 ): string {
   const recentlyUsed = recentlyUsedNames(recent)
   const offeredIds = new Set(offered.map((it) => it.id))
+  const anchorIds = new Set(anchors.map((it) => it.id))
+  const anchoredBottom = anchors.find(isBottom)
 
   // Bottoms outside today's rotation are withheld from the list entirely, so
-  // reaching for a favourite is not an option the model has. An anchor is
+  // reaching for a favourite is not an option the model has. Pinned pieces are
   // always kept, or asking to build around a resting trouser would silently
   // remove the very piece the request is about.
   const closetLines = closet
-    .filter((it) => it.id === anchor?.id || !isBottom(it) || offeredIds.has(it.id))
+    .filter((it) => anchorIds.has(it.id) || !isBottom(it) || offeredIds.has(it.id))
     .map(
       (it) =>
         `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})${
@@ -345,18 +363,21 @@ Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, h
 
 Occasion: ${occasion}${occasionDescription(occasion) ? ` — ${occasionDescription(occasion)}` : ''}
 ${recentBlock}${
-    anchor
+    anchors.length
       ? `
-The user wants to wear the ${anchor.name} today. All three outfits must include it, and each should build a genuinely different look around it rather than changing one piece between them.${
-          isBottom(anchor)
-            ? ' It is the bottom for all three, so vary the top half, the layers and the shoes.'
+The user has already decided on ${anchors.length === 1 ? 'this piece' : 'these pieces'} and wants to wear ${anchors.length === 1 ? 'it' : 'them together'} today:
+${anchors.map((it) => `- ${it.name}`).join('\n')}
+Every one of the three outfits must include ${anchors.length === 1 ? 'it' : 'all of them'}. Complete each one differently around ${anchors.length === 1 ? 'it' : 'them'} rather than changing a single piece between them — ${variationAxes(anchors)}.${
+          anchoredBottom
+            ? ` The ${anchoredBottom.name} is the bottom for all three, so vary what goes above it.`
             : ''
         }
+If two of the pinned pieces genuinely fight each other, still use them and say what the tension is in that outfit's "why" — the user asked for them, so do not quietly drop one.
 `
       : ''
   }${
-    // The bottom rotation still applies unless the anchor is itself the bottom.
-    anchor && isBottom(anchor)
+    // Bottom rotation still applies unless a pinned piece is itself the bottom.
+    anchoredBottom
       ? ''
       : `
 Build these two outfits around the bottom named, so the wardrobe rotates rather than repeating:
@@ -394,7 +415,7 @@ export async function suggestOutfits(
   profile: ProfileConfig,
   weather: CurrentWeather,
   occasion: string,
-  anchor?: Item,
+  anchors: Item[] = [],
 ): Promise<OutfitResult> {
   const eligible = eligibleCloset(closet)
   if (eligible.length === 0) {
@@ -413,11 +434,11 @@ export async function suggestOutfits(
       model: MODEL,
       max_tokens: 16000,
       output_config: { effort: 'medium' },
-      system: buildSystemPrompt(profile, anchor != null && isBottom(anchor)),
+      system: buildSystemPrompt(profile, anchors.some(isBottom)),
       messages: [
         {
           role: 'user',
-          content: buildUserPrompt(eligible, weather, occasion, recent, offered, assigned, anchor),
+          content: buildUserPrompt(eligible, weather, occasion, recent, offered, assigned, anchors),
         },
       ],
     })

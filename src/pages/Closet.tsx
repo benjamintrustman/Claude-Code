@@ -6,7 +6,13 @@ import { ItemForm } from '../components/ItemForm'
 import { TransferModal } from '../components/TransferModal'
 import { CloseIcon } from '../components/icons'
 
-export function Closet({ onBuildAround }: { onBuildAround: (item: Item) => void }) {
+export function Closet({
+  pinned,
+  onBuildAround,
+}: {
+  pinned: Item[]
+  onBuildAround: (item: Item) => void
+}) {
   const { closet, profile, gaps, addItem, addGap, replaceCloset, deleteItem, updateItem, resetToSeed } =
     useApp()
   const [filter, setFilter] = useState<Category | 'All'>('All')
@@ -100,6 +106,8 @@ export function Closet({ onBuildAround }: { onBuildAround: (item: Item) => void 
             deleteItem(editing.id)
             setEditing(null)
           }}
+          pinnedCount={pinned.length}
+          alreadyPinned={pinned.some((p) => p.id === editing.id)}
           onBuildAround={() => {
             onBuildAround(editing)
             setEditing(null)
@@ -194,12 +202,16 @@ function EditModal({
   onSave,
   onDelete,
   onBuildAround,
+  pinnedCount,
+  alreadyPinned,
 }: {
   item: Item
   onClose: () => void
   onSave: (values: Omit<Item, 'id'>) => void
   onDelete: () => void
   onBuildAround: () => void
+  pinnedCount: number
+  alreadyPinned: boolean
 }) {
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center bg-ink/40 sm:items-center">
@@ -214,10 +226,20 @@ function EditModal({
         <button
           type="button"
           onClick={onBuildAround}
-          className="mb-5 w-full rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-opacity hover:opacity-90"
+          disabled={alreadyPinned}
+          className="w-full rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
         >
-          Build an outfit around this
+          {alreadyPinned
+            ? 'Already in this outfit'
+            : pinnedCount > 0
+              ? 'Add to the outfit'
+              : 'Build an outfit around this'}
         </button>
+        <p className="mb-5 mt-2 text-center text-xs text-ink-soft">
+          {pinnedCount > 0
+            ? `${pinnedCount} piece${pinnedCount > 1 ? 's' : ''} pinned so far`
+            : 'Pin as many pieces as you like, then get outfits built around them'}
+        </p>
 
         <ItemForm initial={item} submitLabel="Save changes" onSubmit={onSave} onCancel={onClose} />
         <button

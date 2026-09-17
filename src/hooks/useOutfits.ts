@@ -18,12 +18,12 @@ export function useOutfits() {
       profile: ProfileConfig,
       weather: CurrentWeather,
       occasion: string,
-      anchor?: Item,
+      anchors: Item[] = [],
     ) => {
       setStatus('loading')
       setError(null)
       try {
-        const result = await suggestOutfits(closet, profile, weather, occasion, anchor)
+        const result = await suggestOutfits(closet, profile, weather, occasion, anchors)
         setOutfits(result.outfits)
         setBottomsOffered(result.bottomsOffered)
         setStatus('ready')
