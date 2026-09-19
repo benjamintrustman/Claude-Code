@@ -45,6 +45,21 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
         'charcoal', 'dark grey', 'obsidian stone grey', 'near-black', 'black',
       ],
     },
+    stylingPatterns: [
+      'A plain white or cream tee is the base layer in nearly every outfit he actually wears. It is the default starting point, not a fallback — reach for it before reaching for a shirt as the bottom layer',
+      'One dark garment per outfit, not two. It sits either at the bottom (the trouser) or on top (the jacket or overshirt), and the rest of the outfit is light or mid. An outfit with a dark top AND a dark bottom is not how he dresses',
+      'The outer layer is worn open over the tee — never buttoned or zipped shut. The light middle showing through the open front is what carries the value contrast',
+      'Trousers are wide and full length, worn high, with a full break or a single turned cuff. A cropped or hip-length jacket is what balances them — a long layer over a full trouser is the proportion to avoid',
+      'A brown leather belt is usually visible at the waist',
+      'An outfit with no dark piece at all is fine, and common — two mid tones held apart by a white tee and a light shoe reads correctly',
+    ],
+    knownGoodLooks: [
+      'Cream/navy plaid overshirt open over a white tee, brown corduroy trouser, dark brown lace-up boot — the cream plaid is the light anchor on top against the dark bottom',
+      'Taylor & Stitch lighter tan work jacket open over a white tee, brown corduroy trouser, beige suede sneaker — a light jacket and a light shoe bracketing the one dark piece',
+      'Sage/stone shirt open over a white tee, Toast brick/terracotta wide-leg trouser with a single cuff, white sneaker, brown belt — no dark piece anywhere; two mid tones held apart by the white',
+      '45R indigo linen short-sleeve overshirt open over a white tee, stone/greige trouser cuffed once, tan suede moc boot, brown belt — the dark piece on top for once, over a light bottom',
+      'mfpen charcoal cropped zip jacket over a cream tee, stone/greige wide-leg trouser, dark brown derby — a cropped jacket against a high full trouser, dark above and below a light middle',
+    ],
   },
   yona: {
     id: 'yona',

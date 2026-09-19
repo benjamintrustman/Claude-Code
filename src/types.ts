@@ -74,6 +74,10 @@ export type ProfileConfig = {
    *  hue. For a colourblind wearer this is the axis that actually separates
    *  pieces, so the prompt reasons in value and not just in colour names. */
   valueBands?: { light: string[]; mid: string[]; dark: string[] }
+  /** Habits that hold across outfits rather than belonging to any one of them —
+   *  what the base layer is, how layers are worn, how much dark is used. Read
+   *  off photographs of real outfits, which carry what a list of items cannot. */
+  stylingPatterns?: string[]
   /** Combinations this person is known to actually wear. Evidence of taste,
    *  far more useful to the model than an adjective like "boho". */
   knownGoodLooks?: string[]
