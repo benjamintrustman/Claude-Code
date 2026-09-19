@@ -29,18 +29,20 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
     ],
     valueBands: {
       light: [
-        'cream', 'ivory', 'white', 'natural', 'paper/off-white', 'oatmeal',
-        'sand', 'khaki', 'stone', 'greige', 'beige', 'tan', 'light blue',
+        'cream', 'ivory', 'white', 'natural', 'ecru', 'paper/off-white', 'bone',
+        'vanilla', 'sea salt white', 'oatmeal', 'oyster grey', 'sand', 'khaki',
+        'stone', 'greige', 'beige', 'tan', 'light blue', 'light blue wash',
       ],
       mid: [
         'camel', 'cognac', 'medium brown', 'rust', 'terracotta', 'brick',
-        'olive', 'sage', 'army green', 'grey-green', 'blue-grey',
-        'dusty blue-green', 'French blue', 'grey', 'indigo', 'burgundy',
-        'mustard', 'lime green',
+        'olive', 'sage', 'army green', 'grey-green', 'dusty fern', 'blue-grey',
+        'dusty blue-green', 'French blue', 'mid-wash blue', 'grey', 'indigo',
+        'teal', 'lavender-grey', 'burgundy', 'mustard', 'lime green',
       ],
       dark: [
-        'brown', 'dark brown', 'dark chocolate', 'dark olive', 'navy',
-        'dark navy', 'dark indigo', 'charcoal', 'dark grey', 'near-black',
+        'brown', 'dark brown', 'olmo', 'archeo brown', 'rustic brown',
+        'dark chocolate', 'dark olive', 'navy', 'dark navy', 'dark indigo',
+        'charcoal', 'dark grey', 'obsidian stone grey', 'near-black', 'black',
       ],
     },
   },

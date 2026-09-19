@@ -178,7 +178,7 @@ function buildSystemPrompt(profile: ProfileConfig, anchoredBottom: boolean): str
   // cannot tell whether "brown" is a light tan or a near-black chocolate. The
   // bands supply the missing axis, so the rule becomes checkable.
   const bands = profile.valueBands
-    ? `\n\nJudge colour by value — how light or dark a piece reads — and not by hue alone. Every colour in this closet falls into one of these bands:\n- Light: ${profile.valueBands.light.join(', ')}\n- Mid: ${profile.valueBands.mid.join(', ')}\n- Dark: ${profile.valueBands.dark.join(', ')}\nA piece whose colour names two of these ('cream/navy', 'white/rust') reads as the lighter one from across a room. Before returning an outfit, place each piece in its band and check the outfit against the hard rules above.`
+    ? `\n\nJudge colour by value — how light or dark a piece reads — and not by hue alone. Every colour in this closet falls into one of these bands:\n- Light: ${profile.valueBands.light.join(', ')}\n- Mid: ${profile.valueBands.mid.join(', ')}\n- Dark: ${profile.valueBands.dark.join(', ')}\nA piece whose colour names two of these ('cream/navy', 'white/rust') reads as the lighter one from across a room, and a colour not listed is placed by the ordinary colour word inside it — 'Archeo Brown' is a brown, 'Sea Salt White' is a white. The trouser is the largest block of colour in any outfit, so when the bottom is dark-band only one further dark garment is available. Before returning an outfit, place each piece in its band and check it against the hard rules above.`
     : ''
   // Real combinations beat adjectives: they show how this person actually
   // balances proportion and colour. Framed as evidence, not templates, so the
