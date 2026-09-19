@@ -172,7 +172,13 @@ function buildSystemPrompt(profile: ProfileConfig, anchoredBottom: boolean): str
     ? `\n\nHard rules (never violate these):\n${profile.hardRules.map((r) => `- ${r}`).join('\n')}`
     : ''
   const palette = profile.colorPalette
-    ? `\n\nPreferred color palette: ${profile.colorPalette.join(', ')}`
+    ? `\n\nPreferred color palette:\n${profile.colorPalette.map((c) => `- ${c}`).join('\n')}`
+    : ''
+  // Hue names alone give the model no way to apply a value-contrast rule — it
+  // cannot tell whether "brown" is a light tan or a near-black chocolate. The
+  // bands supply the missing axis, so the rule becomes checkable.
+  const bands = profile.valueBands
+    ? `\n\nJudge colour by value — how light or dark a piece reads — and not by hue alone. Every colour in this closet falls into one of these bands:\n- Light: ${profile.valueBands.light.join(', ')}\n- Mid: ${profile.valueBands.mid.join(', ')}\n- Dark: ${profile.valueBands.dark.join(', ')}\nA piece whose colour names two of these ('cream/navy', 'white/rust') reads as the lighter one from across a room. Before returning an outfit, place each piece in its band and check the outfit against the hard rules above.`
     : ''
   // Real combinations beat adjectives: they show how this person actually
   // balances proportion and colour. Framed as evidence, not templates, so the
@@ -186,7 +192,7 @@ function buildSystemPrompt(profile: ProfileConfig, anchoredBottom: boolean): str
     : ''
   return `You are a personal styling assistant for a wardrobe app called Fit Check. Suggest outfits built ONLY from clothes the user already owns — never invent or substitute items.
 
-User's aesthetic: ${profile.aesthetic}${rules}${palette}${looks}
+User's aesthetic: ${profile.aesthetic}${rules}${palette}${bands}${looks}
 
 Every piece in this closet already meets the user's standards for fit, rise, and silhouette — they own it, so it passed. Never skip a piece because you cannot tell from its name whether it complies with some rule, and never limit yourself to the items whose names happen to state their cut. Treat the whole closet as equally wearable and judge only on colour, texture, formality, and weather.
 

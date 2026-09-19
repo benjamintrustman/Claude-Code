@@ -70,6 +70,10 @@ export type ProfileConfig = {
   /** Minimum trouser rise, in inches. Used when judging a potential purchase. */
   minRise?: number
   colorPalette?: string[]
+  /** The closet's colours sorted by how light or dark they read, rather than by
+   *  hue. For a colourblind wearer this is the axis that actually separates
+   *  pieces, so the prompt reasons in value and not just in colour names. */
+  valueBands?: { light: string[]; mid: string[]; dark: string[] }
   /** Combinations this person is known to actually wear. Evidence of taste,
    *  far more useful to the model than an adjective like "boho". */
   knownGoodLooks?: string[]

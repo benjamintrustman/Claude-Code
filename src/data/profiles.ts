@@ -7,7 +7,8 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
     aesthetic:
       'Worn European Workwear — Copenhagen / Forum Store sensibility. Earthy, understated, heritage-leaning, artisanal. Warm earth tones: camel, tan, terracotta, tobacco, olive, sage, brown. Brass hardware, workwear construction details. 5\'8", 28" inseam, proportionally long torso. Red-green colorblind with some blue-purple confusion — dark saturated tones (deep navy, dark olive, dark brown) compress into ambiguity against each other, so outfits should avoid stacking them and prefer contrast in value, not just hue.',
     hardRules: [
-      'Avoid stacking multiple dark saturated tones (deep navy, dark olive, dark brown) in one outfit — prefer contrast in value, not just hue',
+      'Every outfit needs at least one clear step in value — a light or mid piece read against a darker one. An outfit where everything sits in the same band is the failure mode to avoid',
+      'At most two pieces from the dark band, and they must not sit adjacent to each other (a dark navy knit over a dark olive trouser is exactly the pairing that collapses). Footwear and belts do not count toward that limit — dark leather is a neutral here',
     ],
     purchaseRules: [
       'Trouser rise minimum 13.5", ideally 14"+',
@@ -16,6 +17,32 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'No loafers',
     ],
     minRise: 13.5,
+    // Drawn from the closet itself rather than invented — these are the colours
+    // actually hanging there, grouped into the families they fall into.
+    colorPalette: [
+      'tan, camel, sand, khaki, oatmeal, beige, stone/greige (the spine — most outfits lean on these)',
+      'brown, cognac, dark chocolate, tobacco, rust, terracotta, brick, burgundy',
+      'olive, dark olive, sage, army green, grey-green',
+      'cream, ivory, natural, paper/off-white, white',
+      'light blue, dusty blue-green, French blue, indigo, dark indigo, navy, blue-grey',
+      'grey, charcoal, dark grey, near-black',
+    ],
+    valueBands: {
+      light: [
+        'cream', 'ivory', 'white', 'natural', 'paper/off-white', 'oatmeal',
+        'sand', 'khaki', 'stone', 'greige', 'beige', 'tan', 'light blue',
+      ],
+      mid: [
+        'camel', 'cognac', 'medium brown', 'rust', 'terracotta', 'brick',
+        'olive', 'sage', 'army green', 'grey-green', 'blue-grey',
+        'dusty blue-green', 'French blue', 'grey', 'indigo', 'burgundy',
+        'mustard', 'lime green',
+      ],
+      dark: [
+        'brown', 'dark brown', 'dark chocolate', 'dark olive', 'navy',
+        'dark navy', 'dark indigo', 'charcoal', 'dark grey', 'near-black',
+      ],
+    },
   },
   yona: {
     id: 'yona',
