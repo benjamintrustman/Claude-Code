@@ -32,7 +32,7 @@ export function useLocation() {
         setNotice(`${message} Using your saved location instead.`)
       } else {
         setLocation(DEFAULT_LOCATION)
-        setNotice(`${message} Showing New York, NY — set your location below.`)
+        setNotice(`${message} Showing New York, NY for now.`)
       }
       setStatus('ready')
     }

@@ -22,8 +22,14 @@ export function Today({
   const { closet, profile } = useApp()
   const [occasion, setOccasion] = useState(OCCASIONS[0].label)
   const [editingLocation, setEditingLocation] = useState(false)
-  const { location, status: locationStatus, notice, setManualLocation, useDeviceLocationInstead } =
-    useLocation()
+  const {
+    location,
+    status: locationStatus,
+    notice,
+    setManualLocation,
+    useDeviceLocationInstead,
+    retryDeviceLocation,
+  } = useLocation()
   const {
     data: weather,
     status: weatherStatus,
@@ -55,6 +61,7 @@ export function Today({
         weatherError={weatherError}
         onEditLocation={() => setEditingLocation(true)}
         onRetryWeather={retry}
+        onRetryLocation={retryDeviceLocation}
       />
 
       {anchors.length > 0 && (

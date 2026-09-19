@@ -148,12 +148,17 @@ export function getDevicePosition(): Promise<{ lat: number; lon: number }> {
         if (err.code === err.PERMISSION_DENIED) {
           reject(new GeoError('denied', 'Location access was denied.'))
         } else if (err.code === err.TIMEOUT) {
-          reject(new GeoError('timeout', 'Location request timed out.'))
+          reject(
+            new GeoError(
+              'timeout',
+              'Location request timed out. On a Mac this is usually Location Services being off for the browser rather than a slow fix — check System Settings \u2192 Privacy & Security \u2192 Location Services.',
+            ),
+          )
         } else {
           reject(new GeoError('unavailable', 'Location is currently unavailable.'))
         }
       },
-      { timeout: 10000, maximumAge: 5 * 60 * 1000 },
+      { timeout: 20000, maximumAge: 5 * 60 * 1000 },
     )
   })
 }

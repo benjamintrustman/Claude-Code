@@ -13,6 +13,7 @@ export function WeatherCard({
   weatherError,
   onEditLocation,
   onRetryWeather,
+  onRetryLocation,
 }: {
   location: Location
   locationStatus: 'locating' | 'ready'
@@ -22,6 +23,7 @@ export function WeatherCard({
   weatherError: string | null
   onEditLocation: () => void
   onRetryWeather: () => void
+  onRetryLocation: () => void
 }) {
   const displayLabel =
     location.source === 'geolocation' && weather ? prettifyTimezone(weather.timezone) : location.label
@@ -43,10 +45,28 @@ export function WeatherCard({
       </div>
 
       {locationNotice && (
-        <p className="mb-3 flex items-start gap-1.5 rounded-lg bg-clay-bg/50 px-2.5 py-2 text-xs text-clay">
-          <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          {locationNotice}
-        </p>
+        <div className="mb-3 rounded-lg bg-clay-bg/50 px-2.5 py-2 text-xs text-clay">
+          <p className="flex items-start gap-1.5">
+            <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            {locationNotice}
+          </p>
+          <div className="mt-1.5 flex gap-3 pl-5">
+            <button
+              type="button"
+              onClick={onRetryLocation}
+              className="underline decoration-clay/40 underline-offset-2 hover:decoration-clay"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={onEditLocation}
+              className="underline decoration-clay/40 underline-offset-2 hover:decoration-clay"
+            >
+              Set it manually
+            </button>
+          </div>
+        </div>
       )}
 
       {weatherStatus === 'loading' && <p className="text-sm text-ink-soft">Loading weather…</p>}
