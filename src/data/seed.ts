@@ -93,6 +93,7 @@ function benCloset(): Item[] {
     item('Trousers', 'KOTN dark brown trouser', 'dark brown', { brand: 'KOTN' }),
     item('Trousers', 'Uniqlo wide-leg khaki trouser', 'khaki', { brand: 'Uniqlo' }),
     item('Trousers', 'Mid-wash denim', 'mid-wash blue'),
+    item('Trousers', 'Wax London ecru trouser', 'ecru', { brand: 'Wax London' }),
     item('Trousers', 'Carhartt Parrish Pant', 'Obsidian Stone Grey', { brand: 'Carhartt', rise: 13.5 }),
 
     // Footwear

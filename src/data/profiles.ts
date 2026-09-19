@@ -7,7 +7,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
     aesthetic:
       'Worn European Workwear — Copenhagen / Forum Store sensibility. Earthy, understated, heritage-leaning, artisanal. Warm earth tones: camel, tan, terracotta, tobacco, olive, sage, brown. Brass hardware, workwear construction details. 5\'8", 28" inseam, proportionally long torso. Red-green colorblind with some blue-purple confusion — dark saturated tones (deep navy, dark olive, dark brown) compress into ambiguity against each other, so outfits should avoid stacking them and prefer contrast in value, not just hue.',
     hardRules: [
-      'Every outfit needs at least one clear step in value — a light or mid piece read against a darker one. An outfit where everything sits in the same band is the failure mode to avoid',
+      'Pieces may sit close in value only at the light end. A tonal outfit — ecru trouser, sand tee, beige shoe — is a look he wears and likes, because light values stay separable. The same closeness among dark pieces collapses into mud, and that is the failure mode to avoid',
       'At most two pieces from the dark band, and they must not sit adjacent to each other (a dark navy knit over a dark olive trouser is exactly the pairing that collapses). Footwear and belts do not count toward that limit — dark leather is a neutral here',
     ],
     purchaseRules: [
@@ -51,13 +51,16 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'The outer layer is worn open over the tee — never buttoned or zipped shut. The light middle showing through the open front is what carries the value contrast',
       'Trousers are wide and full length, worn high, with a full break or a single turned cuff. A cropped or hip-length jacket is what balances them — a long layer over a full trouser is the proportion to avoid',
       'A brown leather belt is usually visible at the waist',
-      'An outfit with no dark piece at all is fine, and common — two mid tones held apart by a white tee and a light shoe reads correctly',
+      'Half his outfits have no dark garment at all. Two mid tones held apart by a white tee and a light shoe reads correctly, and so does an all-light tonal look with no contrast to speak of',
+      'A bag, when he carries one, is warm brown leather worn crossbody — it reads as part of the outfit rather than as luggage',
+      'Not every outfit has a layer. A tee and a trouser on their own is a complete look when the tones and the proportion carry it',
     ],
     knownGoodLooks: [
       'Wax London plaid overshirt open over a white tee, KOTN dark brown trouser, Jacques Solovière near-black pebbled hiker — the cream plaid is the light anchor on top, and the near-black shoe under a dark trouser is fine because shoes do not count as the dark garment',
       'Taylor & Stitch lighter tan work jacket open over a white tee, KOTN brown corduroy trouser, Mephisto Rainbow tan suede moccasin hiker — a light jacket and a light shoe bracketing the one dark piece, the trouser',
       'Mac Weldon sage/stone shirt open over a white tee, Toast brick/terracotta wide-leg trouser with a single cuff, Diadora Equipe Vela SW, brown belt — no dark piece anywhere; two mid tones held apart by the white tee and the white sneaker',
       '45R indigo linen short-sleeve overshirt open over a white tee, G1 Goods sage/olive utility trouser cuffed once, Mephisto Rainbow tan suede moccasin hiker, brown belt — the darkest piece on top for once rather than at the bottom, over a mid trouser, with the white tee showing through the open front',
+      'Buck Mason heavyweight tee (camel) untucked over a Wax London ecru trouser cuffed once, Camper suede beige sneakers, Coach cognac/tan belt bag worn crossbody — no layer and no dark piece at all; the whole outfit sits in warm light tones and works on texture and proportion rather than contrast',
       'mfpen charcoal wool cropped zip jacket over a cream tee, mfpen stone/greige flannel trouser, Jacques Solovière near-black pebbled hiker — a cropped jacket against a high full trouser; the jacket is the one dark garment, the light trouser carries the contrast, and the near-black shoe is exempt',
     ],
   },
