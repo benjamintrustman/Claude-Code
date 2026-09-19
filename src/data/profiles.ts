@@ -57,8 +57,8 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'Wax London plaid overshirt open over a white tee, KOTN dark brown trouser, Jacques Solovière near-black pebbled hiker — the cream plaid is the light anchor on top, and the near-black shoe under a dark trouser is fine because shoes do not count as the dark garment',
       'Taylor & Stitch lighter tan work jacket open over a white tee, KOTN brown corduroy trouser, Mephisto Rainbow tan suede moccasin hiker — a light jacket and a light shoe bracketing the one dark piece, the trouser',
       'Mac Weldon sage/stone shirt open over a white tee, Toast brick/terracotta wide-leg trouser with a single cuff, Diadora Equipe Vela SW, brown belt — no dark piece anywhere; two mid tones held apart by the white tee and the white sneaker',
-      '45R indigo linen short-sleeve overshirt open over a white tee, stone/greige trouser cuffed once, tan suede moc boot, brown belt — the dark piece on top for once, over a light bottom',
-      'mfpen charcoal cropped zip jacket over a cream tee, stone/greige wide-leg trouser, dark brown derby — a cropped jacket against a high full trouser, dark above and below a light middle',
+      '45R indigo linen short-sleeve overshirt open over a white tee, G1 Goods sage/olive utility trouser cuffed once, Mephisto Rainbow tan suede moccasin hiker, brown belt — the darkest piece on top for once rather than at the bottom, over a mid trouser, with the white tee showing through the open front',
+      'mfpen charcoal wool cropped zip jacket over a cream tee, mfpen stone/greige flannel trouser, Jacques Solovière near-black pebbled hiker — a cropped jacket against a high full trouser; the jacket is the one dark garment, the light trouser carries the contrast, and the near-black shoe is exempt',
     ],
   },
   yona: {
