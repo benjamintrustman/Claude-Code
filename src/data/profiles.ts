@@ -54,7 +54,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'An outfit with no dark piece at all is fine, and common — two mid tones held apart by a white tee and a light shoe reads correctly',
     ],
     knownGoodLooks: [
-      'Cream/navy plaid overshirt open over a white tee, brown corduroy trouser, dark brown lace-up boot — the cream plaid is the light anchor on top against the dark bottom',
+      'Wax London plaid overshirt open over a white tee, KOTN dark brown trouser, Jacques Solovière near-black pebbled hiker — the cream plaid is the light anchor on top, and the near-black shoe under a dark trouser is fine because shoes do not count as the dark garment',
       'Taylor & Stitch lighter tan work jacket open over a white tee, brown corduroy trouser, beige suede sneaker — a light jacket and a light shoe bracketing the one dark piece',
       'Sage/stone shirt open over a white tee, Toast brick/terracotta wide-leg trouser with a single cuff, white sneaker, brown belt — no dark piece anywhere; two mid tones held apart by the white',
       '45R indigo linen short-sleeve overshirt open over a white tee, stone/greige trouser cuffed once, tan suede moc boot, brown belt — the dark piece on top for once, over a light bottom',
