@@ -101,15 +101,15 @@ function benCloset(): Item[] {
     // Footwear
     item('Footwear', 'Jacques Solovière near-black pebbled hiker', 'near-black'),
     item('Footwear', 'Gravity Pope brown derby, black lug sole', 'brown'),
-    item('Footwear', 'Mephisto Rainbow tan suede moccasin hiker', 'tan'),
+    item('Footwear', 'Mephisto Rainbow moccasin hiker', 'brown suede', { brand: 'Mephisto', note: 'Suede moccasin hiker' }),
     item('Footwear', 'Mephisto navy pebbled sneaker', 'navy'),
     item('Footwear', 'Pikolinos Vigo', 'dark brown olmo', { brand: 'Pikolinos', note: 'Dark brown lace-up boot, European dress-casual' }),
     item('Footwear', 'Danner Mountain 360 dark grey suede boot', 'dark grey'),
-    item('Footwear', 'Diadora Equipe Vela SW', 'white/rust'),
-    item('Footwear', 'Diadora Heritage Equipe Dirty SW Evo Beige Dew', 'beige'),
+    item('Footwear', 'Diadora Equipe Vela SW', 'cream/rust', { brand: 'Diadora', note: 'Retro low-top sneaker' }),
+    item('Footwear', 'Diadora Heritage Equipe Dirty SW Evo Beige Dew', 'grey/cream', { brand: 'Diadora', note: 'Retro low-top sneaker with a deliberately worn, distressed finish' }),
     item('Footwear', 'Grey-green Air Force 1', 'grey-green'),
     item('Footwear', 'Nike Killshot 2 dark chocolate leather', 'dark chocolate'),
-    item('Footwear', 'Air Jordan 3 Winterized', 'Archeo Brown', { brand: 'Nike' }),
+    item('Footwear', 'Air Jordan 3 Winterized', 'brown/white with grey accents', { brand: 'Nike', note: 'Winterized high-top sneaker' }),
     item('Footwear', 'Taylor and Stitch Moto cap toe boot', 'Brown'),
     item('Footwear', 'Camper suede Beige sneakers red gum', 'Beige with red gum'),
     item('Footwear', 'Nike Air Force One \'07 LX', 'Light bone and pale vanilla'),
@@ -117,7 +117,7 @@ function benCloset(): Item[] {
     item('Footwear', 'Pikolinos Chukka', 'Brown'),
     item('Footwear', 'Blundstone 1944 Chelsea boot', 'Rustic Brown'),
     item('Footwear', 'Nike Air Max black/bright blue', 'black/bright blue', { brand: 'Nike', functional: true }),
-    item('Footwear', 'Asics gel NYC 2.0', 'Cream/Dusty Fern', { brand: 'Asics', note: 'Running style streetwear shoe' }),
+    item('Footwear', 'Asics gel NYC 2.0', 'cream with dark sage green accents', { brand: 'Asics', note: 'Running-style streetwear sneaker' }),
 
     // Bag
     item('Bag', 'Brown leather Pikolinos satchel', 'brown'),
