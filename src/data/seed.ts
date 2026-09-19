@@ -40,6 +40,7 @@ function benCloset(): Item[] {
     item('Overshirt', 'Wax London navy textured overshirt', 'navy'),
     item('Overshirt', 'Wax London plaid overshirt', 'cream/navy'),
     item('Overshirt', '45R indigo linen short-sleeve overshirt', 'indigo'),
+    item('Overshirt', 'True Grit Superior Standard overshirt', 'rust/tobacco/navy', { brand: 'True Grit', note: 'Wool blend' }),
 
     // Shirt
     item('Shirt', 'Cream/natural stripe button-up (Grandpa, Sweden)', 'cream/natural'),
@@ -94,6 +95,7 @@ function benCloset(): Item[] {
     item('Trousers', 'Uniqlo wide-leg khaki trouser', 'khaki', { brand: 'Uniqlo' }),
     item('Trousers', 'Mid-wash denim', 'mid-wash blue'),
     item('Trousers', 'Wax London ecru trouser', 'ecru', { brand: 'Wax London' }),
+    item('Trousers', 'Edmmond Studios wool trouser', 'olive/army green', { brand: 'Edmmond Studios', note: 'Pleated with a tapered leg — the exception to his wide-leg trousers, so it reads narrower' }),
     item('Trousers', 'Carhartt Parrish Pant', 'Obsidian Stone Grey', { brand: 'Carhartt', rise: 13.5 }),
 
     // Footwear

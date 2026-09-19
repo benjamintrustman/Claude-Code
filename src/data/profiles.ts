@@ -34,7 +34,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
         'stone', 'greige', 'beige', 'tan', 'light blue', 'light blue wash',
       ],
       mid: [
-        'camel', 'cognac', 'medium brown', 'rust', 'terracotta', 'brick',
+        'camel', 'cognac', 'medium brown', 'tobacco', 'rust', 'terracotta', 'brick',
         'olive', 'sage', 'army green', 'grey-green', 'dusty fern', 'blue-grey',
         'dusty blue-green', 'French blue', 'mid-wash blue', 'grey', 'indigo',
         'teal', 'lavender-grey', 'burgundy', 'mustard', 'lime green',
