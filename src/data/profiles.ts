@@ -8,7 +8,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'Worn European Workwear — Copenhagen / Forum Store sensibility. Earthy, understated, heritage-leaning, artisanal. Warm earth tones: camel, tan, terracotta, tobacco, olive, sage, brown. Brass hardware, workwear construction details. 5\'8", 28" inseam, proportionally long torso. Red-green colorblind with some blue-purple confusion — dark saturated tones (deep navy, dark olive, dark brown) compress into ambiguity against each other, so outfits should avoid stacking them and prefer contrast in value, not just hue.',
     hardRules: [
       'Pieces may sit close in value only at the light end. A tonal outfit — ecru trouser, sand tee, beige shoe — is a look he wears and likes, because light values stay separable. The same closeness among dark pieces collapses into mud, and that is the failure mode to avoid',
-      'At most two pieces from the dark band, and they must not sit adjacent to each other (a dark navy knit over a dark olive trouser is exactly the pairing that collapses). Footwear and belts do not count toward that limit — dark leather is a neutral here',
+      'At most two pieces from the dark band, and two only when something light runs between them. A layer worn open over a white tee does this — the light stripe down the centre keeps a dark navy overshirt legible against a dark brown trouser. Closed up, or with a dark piece underneath, the same two collapse into each other. Footwear and belts do not count toward the limit at all — dark leather is a neutral here',
     ],
     purchaseRules: [
       'Trouser rise minimum 13.5", ideally 14"+',
@@ -47,8 +47,8 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
     },
     stylingPatterns: [
       'A plain white or cream tee is the base layer in nearly every outfit he actually wears. It is the default starting point, not a fallback — reach for it before reaching for a shirt as the bottom layer',
-      'One dark garment per outfit, not two. It sits either at the bottom (the trouser) or on top (the jacket or overshirt), and the rest of the outfit is light or mid. An outfit with a dark top AND a dark bottom is not how he dresses',
-      'The outer layer is worn open over the tee — never buttoned or zipped shut. The light middle showing through the open front is what carries the value contrast',
+      'Usually one dark garment, often none, and the rest light or mid. Two happens — a dark overshirt over a dark trouser — but only ever open over a white tee, which is what makes the pairing readable. Do not build a dark top over a dark bottom without that light break',
+      'The outer layer is worn open over the tee — never buttoned or zipped shut. The light middle showing through the open front is what carries the value contrast, and it is the only thing that lets two dark pieces work together',
       'Trousers are wide and full length, worn high, with a full break or a single turned cuff. A cropped or hip-length jacket is what balances them — a long layer over a full trouser is the proportion to avoid',
       'A brown leather belt is usually visible at the waist',
       'Half his outfits have no dark garment at all. Two mid tones held apart by a white tee and a light shoe reads correctly, and so does an all-light tonal look with no contrast to speak of',
@@ -61,6 +61,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'Mac Weldon sage/stone shirt open over a white tee, Toast brick/terracotta wide-leg trouser with a single cuff, Diadora Equipe Vela SW, brown belt — no dark piece anywhere; two mid tones held apart by the white tee and the white sneaker',
       '45R indigo linen short-sleeve overshirt open over a white tee, G1 Goods sage/olive utility trouser cuffed once, Mephisto Rainbow tan suede moccasin hiker, brown belt — the darkest piece on top for once rather than at the bottom, over a mid trouser, with the white tee showing through the open front',
       'Buck Mason heavyweight tee (camel) untucked over a Wax London ecru trouser cuffed once, Camper suede beige sneakers, Coach cognac/tan belt bag worn crossbody — no layer and no dark piece at all; the whole outfit sits in warm light tones and works on texture and proportion rather than contrast',
+      'Wax London navy textured overshirt open over a white tee, KOTN brown corduroy trouser, brown belt, dark brown lace-up shoe — the one look with two dark garments; navy over brown would collapse but for the white tee running down the centre of the open front',
       'mfpen charcoal wool cropped zip jacket over a cream tee, mfpen stone/greige flannel trouser, Jacques Solovière near-black pebbled hiker — a cropped jacket against a high full trouser; the jacket is the one dark garment, the light trouser carries the contrast, and the near-black shoe is exempt',
     ],
   },
