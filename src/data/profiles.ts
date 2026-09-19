@@ -52,7 +52,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       'Trousers are wide and full length, worn high, with a full break or a single turned cuff. A cropped or hip-length jacket is what balances them — a long layer over a full trouser is the proportion to avoid',
       'A brown leather belt is usually visible at the waist',
       'Half his outfits have no dark garment at all. Two mid tones held apart by a white tee and a light shoe reads correctly, and so does an all-light tonal look with no contrast to speak of',
-      'A bag, when he carries one, is worn crossbody — warm brown leather with a tonal or earthy outfit, a plain black sling with a grey or charcoal one. Either way it sits on the body rather than in the hand',
+      'A bag, when he carries one, is worn crossbody and it is leather — warm brown with a tonal or earthy outfit, shiny black with a grey or charcoal one. Either way it sits on the body rather than in the hand',
       'Not every outfit has a layer. A tee and a trouser on their own is a complete look when the tones and the proportion carry it',
     ],
     knownGoodLooks: [
@@ -62,7 +62,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       '45R indigo linen short-sleeve overshirt open over a white tee, G1 Goods sage/olive utility trouser cuffed once, Mephisto Rainbow tan suede moccasin hiker, brown belt — the darkest piece on top for once rather than at the bottom, over a mid trouser, with the white tee showing through the open front',
       'Buck Mason heavyweight tee (camel) untucked over a Wax London ecru trouser cuffed once, Camper suede beige sneakers, Coach cognac/tan belt bag worn crossbody — no layer and no dark piece at all; the whole outfit sits in warm light tones and works on texture and proportion rather than contrast',
       'Wax London navy textured overshirt open over a white tee, KOTN brown pleated trouser, brown belt, Pikolinos Vigo — the one look with two dark garments; navy over brown would collapse but for the white tee running down the centre of the open front',
-      'Berner Kühl blue-grey ribbed zip knit zipped shut over a white tee, Carhartt Parrish Pant in obsidian stone grey, Jacques Solovière near-black pebbled hiker, black sling worn crossbody — the one closed layer; only the tee hem shows below the knit, so the knit has to stay lighter than the trouser for the two to separate',
+      'Berner Kühl blue-grey ribbed zip knit zipped shut over a white tee, Carhartt Parrish Pant in obsidian stone grey, Jacques Solovière near-black pebbled hiker, Shiny black crossbody — the one closed layer. Only the tee hem shows below the knit, so nothing light runs between them; the grey knit reading lighter than the obsidian trouser is what separates the two',
       'mfpen charcoal wool cropped zip jacket over a cream tee, mfpen stone/greige flannel trouser, Jacques Solovière near-black pebbled hiker — a cropped jacket against a high full trouser; the jacket is the one dark garment, the light trouser carries the contrast, and the near-black shoe is exempt',
     ],
   },
