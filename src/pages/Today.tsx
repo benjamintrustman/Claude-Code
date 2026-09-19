@@ -37,6 +37,7 @@ export function Today({
     status: outfitsStatus,
     error: outfitsError,
     generate,
+    cancel,
   } = useOutfits()
 
   const canSuggest = weatherStatus === 'ready' && weather != null
@@ -110,23 +111,33 @@ export function Today({
         </div>
       </section>
 
-      <button
-        type="button"
-        disabled={!canSuggest || outfitsStatus === 'loading'}
-        onClick={async () => {
-          // Never build on what's on screen — it may be days old if the app
-          // has been sitting open. Refetch first if the reading has aged out.
-          const current = await ensureFresh()
-          if (current) generate(closet, profile, current, occasion, anchors)
-        }}
-        className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
-      >
-        {outfitsStatus === 'loading'
-          ? 'Thinking…'
-          : anchors.length
+      {outfitsStatus === 'loading' ? (
+        // The same slot, not an extra control: one full-width tap target, so
+        // a change of mind mid-request costs nothing on a phone.
+        <button
+          type="button"
+          onClick={cancel}
+          className="w-full rounded-full border border-ink px-4 py-3 text-sm font-medium text-ink transition-colors hover:bg-ink/5"
+        >
+          Thinking… — tap to stop
+        </button>
+      ) : (
+        <button
+          type="button"
+          disabled={!canSuggest}
+          onClick={async () => {
+            // Never build on what's on screen — it may be days old if the app
+            // has been sitting open. Refetch first if the reading has aged out.
+            const current = await ensureFresh()
+            if (current) generate(closet, profile, current, occasion, anchors)
+          }}
+          className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
+        >
+          {anchors.length
             ? `Build outfits around ${anchors.length === 1 ? 'this' : `these ${anchors.length}`}`
             : 'Suggest outfits'}
-      </button>
+        </button>
+      )}
 
       {outfitsStatus === 'error' && outfitsError && (
         <p className="mt-3 flex items-start gap-1.5 text-sm text-clay">

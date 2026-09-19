@@ -30,6 +30,8 @@ export type ValidatedOutfit = {
 export type OutfitResult = { outfits: ValidatedOutfit[]; bottomsOffered: string[] }
 
 export class OutfitApiError extends Error {}
+/** The user pressed Stop. Not a failure — the UI returns to idle silently. */
+export class OutfitAbortedError extends Error {}
 
 // The order pieces are read in: bottoms, base layer, shirt, knit, shoes,
 // jacket, accessories. Sorted here rather than asked for in the prompt, so
@@ -416,6 +418,7 @@ export async function suggestOutfits(
   weather: CurrentWeather,
   occasion: string,
   anchors: Item[] = [],
+  signal?: AbortSignal,
 ): Promise<OutfitResult> {
   const eligible = eligibleCloset(closet)
   if (eligible.length === 0) {
@@ -441,10 +444,13 @@ export async function suggestOutfits(
           content: buildUserPrompt(eligible, weather, occasion, recent, offered, assigned, anchors),
         },
       ],
-    })
+    }, { signal })
   } catch (err) {
     if (err instanceof MissingApiKeyError) {
       throw new OutfitApiError(err.message)
+    }
+    if (err instanceof Anthropic.APIUserAbortError) {
+      throw new OutfitAbortedError('Stopped before the suggestions came back.')
     }
     if (err instanceof Anthropic.AuthenticationError) {
       throw new OutfitApiError('Anthropic API key was rejected. Check VITE_ANTHROPIC_API_KEY in .env.')
