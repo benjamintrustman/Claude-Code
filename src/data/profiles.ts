@@ -48,11 +48,11 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
     stylingPatterns: [
       'A plain white or cream tee is the base layer in nearly every outfit he actually wears. It is the default starting point, not a fallback — reach for it before reaching for a shirt as the bottom layer',
       'Usually one dark garment, often none, and the rest light or mid. Two happens — a dark overshirt over a dark trouser — but only ever open over a white tee, which is what makes the pairing readable. Do not build a dark top over a dark bottom without that light break',
-      'The outer layer is worn open over the tee — never buttoned or zipped shut. The light middle showing through the open front is what carries the value contrast, and it is the only thing that lets two dark pieces work together',
+      'The outer layer is usually worn open over the tee, with the light middle showing down the centre. Zipped or buttoned shut does happen, but only when the layer itself is light or mid and nothing else in the outfit is dark except the trouser. The open front is a requirement when two dark pieces are in play, not a preference',
       'Trousers are wide and full length, worn high, with a full break or a single turned cuff. A cropped or hip-length jacket is what balances them — a long layer over a full trouser is the proportion to avoid',
       'A brown leather belt is usually visible at the waist',
       'Half his outfits have no dark garment at all. Two mid tones held apart by a white tee and a light shoe reads correctly, and so does an all-light tonal look with no contrast to speak of',
-      'A bag, when he carries one, is warm brown leather worn crossbody — it reads as part of the outfit rather than as luggage',
+      'A bag, when he carries one, is worn crossbody — warm brown leather with a tonal or earthy outfit, a plain black sling with a grey or charcoal one. Either way it sits on the body rather than in the hand',
       'Not every outfit has a layer. A tee and a trouser on their own is a complete look when the tones and the proportion carry it',
     ],
     knownGoodLooks: [
@@ -62,6 +62,7 @@ export const PROFILES: Record<ProfileId, ProfileConfig> = {
       '45R indigo linen short-sleeve overshirt open over a white tee, G1 Goods sage/olive utility trouser cuffed once, Mephisto Rainbow tan suede moccasin hiker, brown belt — the darkest piece on top for once rather than at the bottom, over a mid trouser, with the white tee showing through the open front',
       'Buck Mason heavyweight tee (camel) untucked over a Wax London ecru trouser cuffed once, Camper suede beige sneakers, Coach cognac/tan belt bag worn crossbody — no layer and no dark piece at all; the whole outfit sits in warm light tones and works on texture and proportion rather than contrast',
       'Wax London navy textured overshirt open over a white tee, KOTN brown pleated trouser, brown belt, Pikolinos Vigo — the one look with two dark garments; navy over brown would collapse but for the white tee running down the centre of the open front',
+      'Berner Kühl blue-grey ribbed zip knit zipped shut over a white tee, Carhartt Parrish Pant in obsidian stone grey, Jacques Solovière near-black pebbled hiker, black sling worn crossbody — the one closed layer; only the tee hem shows below the knit, so the knit has to stay lighter than the trouser for the two to separate',
       'mfpen charcoal wool cropped zip jacket over a cream tee, mfpen stone/greige flannel trouser, Jacques Solovière near-black pebbled hiker — a cropped jacket against a high full trouser; the jacket is the one dark garment, the light trouser carries the contrast, and the near-black shoe is exempt',
     ],
   },
