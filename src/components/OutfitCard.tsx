@@ -1,8 +1,22 @@
 import { useMemo, useState } from 'react'
 import type { ValidatedOutfit } from '../lib/outfits'
-import { AlertIcon } from './icons'
+import { AlertIcon, CheckIcon } from './icons'
 
-export function OutfitCard({ outfit }: { outfit: ValidatedOutfit }) {
+export function OutfitCard({
+  outfit,
+  kept,
+  worn,
+  onToggleKeep,
+  onToggleWorn,
+}: {
+  outfit: ValidatedOutfit
+  kept: boolean
+  worn: boolean
+  onToggleKeep: () => void
+  /** Receives what is on screen, not what was suggested — a swapped slot is
+   *  part of the outfit the user actually put on. */
+  onToggleWorn: (pieces: string[]) => void
+}) {
   // Which slot each piece currently shows. Keyed by the originally suggested
   // item so a swapped slot can always be put back.
   const [swapped, setSwapped] = useState<Record<string, string>>({})
@@ -18,8 +32,19 @@ export function OutfitCard({ outfit }: { outfit: ValidatedOutfit }) {
 
   const hasHallucination = outfit.pieces.some((p) => !p.valid)
 
+  const shownPieces = outfit.pieces.map((p) => swapped[p.item] ?? p.item)
+
   return (
-    <div className="rounded-xl border border-line bg-card p-4">
+    <div
+      className={`rounded-xl border bg-card p-4 ${
+        kept ? 'border-tobacco/50 ring-1 ring-tobacco/20' : 'border-line'
+      }`}
+    >
+      {kept && (
+        <p className="mb-2 text-[11px] font-medium tracking-wide text-tobacco-dark uppercase">
+          Kept
+        </p>
+      )}
       <h3 className="mb-2 font-serif text-lg font-semibold text-ink">{outfit.title}</h3>
       <ul className="mb-3 flex flex-col gap-1.5">
         {outfit.pieces.map((piece, i) => {
@@ -103,6 +128,32 @@ export function OutfitCard({ outfit }: { outfit: ValidatedOutfit }) {
           This suggestion referenced an item that doesn't match anything in your closet.
         </p>
       )}
+
+      <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-line pt-3">
+        <button
+          type="button"
+          onClick={onToggleKeep}
+          className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+            kept
+              ? 'border-tobacco bg-tobacco/10 text-tobacco-dark'
+              : 'border-line text-ink-soft hover:border-tobacco/50 hover:text-ink'
+          }`}
+        >
+          {kept ? 'Keeping this' : 'Keep for the next run'}
+        </button>
+        <button
+          type="button"
+          onClick={() => onToggleWorn(shownPieces)}
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors ${
+            worn
+              ? 'bg-ink text-paper'
+              : 'border border-line text-ink-soft hover:border-ink/40 hover:text-ink'
+          }`}
+        >
+          <CheckIcon className="h-3 w-3" />
+          {worn ? 'Worn today' : 'Wore this'}
+        </button>
+      </div>
     </div>
   )
 }

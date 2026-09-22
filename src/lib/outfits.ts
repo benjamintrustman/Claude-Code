@@ -4,8 +4,8 @@ import type { CurrentWeather } from './weather'
 import { weatherCodeInfo } from './weatherCodes'
 import { occasionDescription } from '../data/occasions'
 import { MissingApiKeyError, getClient } from './anthropicClient'
-import type { RecentOutfit } from './outfitHistory'
-import { loadRecentOutfits, recentlyUsedNames, recordOutfits } from './outfitHistory'
+import type { WornOutfit } from './outfitHistory'
+import { loadWorn, recentlyUsedNames, rotationWindow } from './outfitHistory'
 
 const MODEL = 'claude-sonnet-5'
 
@@ -274,7 +274,8 @@ function shuffle<T>(items: T[]): T[] {
   return a
 }
 
-const isBottom = (it: Item) => it.category === 'Trousers' || it.category === 'Skirt'
+const isBottomCategory = (category: string) => category === 'Trousers' || category === 'Skirt'
+const isBottom = (it: Item) => isBottomCategory(it.category)
 
 function pickNeglected(items: Item[], recentlyUsed: Set<string>, count: number): Item[] {
   const neglected = items.filter((it) => !recentlyUsed.has(it.name))
@@ -332,12 +333,13 @@ function buildUserPrompt(
   closet: Item[],
   weather: CurrentWeather,
   occasion: string,
-  recent: RecentOutfit[],
+  worn: WornOutfit[],
   offered: Item[],
   assigned: Item[],
   anchors: Item[],
+  kept: ValidatedOutfit[],
 ): string {
-  const recentlyUsed = recentlyUsedNames(recent)
+  const recentlyUsed = recentlyUsedNames(worn)
   const offeredIds = new Set(offered.map((it) => it.id))
   const anchorIds = new Set(anchors.map((it) => it.id))
   const anchoredBottom = anchors.find(isBottom)
@@ -359,10 +361,20 @@ function buildUserPrompt(
   const spotlight = spotlightPieces(closet, recentlyUsed)
     .map((it) => `- ${it.name}`)
     .join('\n')
-  const recentBlock = recent.length
-    ? `\nAlready suggested in the last few days — do not repeat these combinations, and don't lean on the same hero pieces again:\n${recent
-        .map((o) => `- ${o.pieces.join(' + ')}`)
+  const recentBlock = worn.length
+    ? `\nWorn in the last few days — do not repeat these combinations, and don't lean on the same hero pieces again:\n${worn
+        .map((o) => `- ${o.occasion}: ${o.pieces.join(' + ')}`)
         .join('\n')}\n`
+    : ''
+  // Kept outfits are ones the user already likes, so their pieces are not
+  // contraband — only the bottom is, since three outfits sharing a trouser is
+  // the repetition this whole rotation exists to prevent.
+  const keptBlock = kept.length
+    ? `
+The user is keeping ${kept.length === 1 ? 'this outfit' : 'these outfits'} from an earlier run and wants more options alongside ${kept.length === 1 ? 'it' : 'them'}:
+${kept.map((o) => `- ${o.title}: ${o.pieces.map((p) => p.item).join(' + ')}`).join('\n')}
+Suggest three that stand beside ${kept.length === 1 ? 'it' : 'them'} as genuinely different alternatives, not variations on the same idea with one piece changed. Individual pieces from ${kept.length === 1 ? 'it' : 'them'} may reappear where they genuinely work better in a different context — the user kept ${kept.length === 1 ? 'that outfit' : 'those outfits'}, so those pieces are ones they like.
+`
     : ''
   const condition = weatherCodeInfo(weather.code).label
   const { label: timeLabel, hour } = localNow(weather.timezone)
@@ -378,7 +390,7 @@ Today's range: low ${Math.round(weather.low)}°F to high ${Math.round(weather.hi
 Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, hour)}
 
 Occasion: ${occasion}${occasionDescription(occasion) ? ` — ${occasionDescription(occasion)}` : ''}
-${recentBlock}${
+${recentBlock}${keptBlock}${
     anchors.length
       ? `
 The user has already decided on ${anchors.length === 1 ? 'this piece' : 'these pieces'} and wants to wear ${anchors.length === 1 ? 'it' : 'them together'} today:
@@ -432,6 +444,7 @@ export async function suggestOutfits(
   weather: CurrentWeather,
   occasion: string,
   anchors: Item[] = [],
+  kept: ValidatedOutfit[] = [],
   signal?: AbortSignal,
 ): Promise<OutfitResult> {
   const eligible = eligibleCloset(closet)
@@ -441,8 +454,14 @@ export async function suggestOutfits(
     )
   }
 
-  const recent = loadRecentOutfits(profile.id)
-  const { offered, assigned } = rotatingBottoms(eligible, recentlyUsedNames(recent))
+  const worn = rotationWindow(loadWorn(profile.id))
+  // A kept outfit's bottom is spoken for, so it must not come round again in
+  // the rotation that is meant to be offering something else.
+  const keptBottoms = new Set(
+    kept.flatMap((o) => o.pieces.filter((p) => isBottomCategory(p.category)).map((p) => p.item)),
+  )
+  const rotatable = eligible.filter((it) => !keptBottoms.has(it.name))
+  const { offered, assigned } = rotatingBottoms(rotatable, recentlyUsedNames(worn))
 
   let response: Anthropic.Message
   try {
@@ -455,7 +474,7 @@ export async function suggestOutfits(
       messages: [
         {
           role: 'user',
-          content: buildUserPrompt(eligible, weather, occasion, recent, offered, assigned, anchors),
+          content: buildUserPrompt(eligible, weather, occasion, worn, offered, assigned, anchors, kept),
         },
       ],
     }, { signal })
@@ -517,6 +536,5 @@ export async function suggestOutfits(
     }
   })
 
-  recordOutfits(profile.id, validated)
   return { outfits: validated, bottomsOffered: offered.map((it) => it.name) }
 }

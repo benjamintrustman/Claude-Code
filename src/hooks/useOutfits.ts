@@ -33,6 +33,7 @@ export function useOutfits() {
       weather: CurrentWeather,
       occasion: string,
       anchors: Item[] = [],
+      kept: ValidatedOutfit[] = [],
     ) => {
       abortRef.current?.abort()
       const controller = new AbortController()
@@ -48,6 +49,7 @@ export function useOutfits() {
           weather,
           occasion,
           anchors,
+          kept,
           controller.signal,
         )
         if (runId !== runIdRef.current) return

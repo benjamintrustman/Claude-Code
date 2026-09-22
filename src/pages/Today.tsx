@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useLocation } from '../hooks/useLocation'
 import { useWeather } from '../hooks/useWeather'
 import { useOutfits } from '../hooks/useOutfits'
@@ -9,6 +9,8 @@ import { OutfitCard } from '../components/OutfitCard'
 import { AlertIcon, CloseIcon } from '../components/icons'
 import { OCCASIONS } from '../data/occasions'
 import type { Item } from '../types'
+import type { ValidatedOutfit } from '../lib/outfits'
+import { loadWorn, recordWorn, removeWorn } from '../lib/outfitHistory'
 
 export function Today({
   anchors,
@@ -22,6 +24,11 @@ export function Today({
   const { closet, profile } = useApp()
   const [occasion, setOccasion] = useState(OCCASIONS[0].label)
   const [editingLocation, setEditingLocation] = useState(false)
+  // Outfits held back through a re-run. Session-only: a shortlist while
+  // deciding, not a record of anything.
+  const [kept, setKept] = useState<ValidatedOutfit[]>([])
+  // Timestamps of what has been marked worn, so the mark can be undone.
+  const [wornAt, setWornAt] = useState<Record<string, number>>({})
   const {
     location,
     status: locationStatus,
@@ -47,6 +54,43 @@ export function Today({
   } = useOutfits()
 
   const canSuggest = weatherStatus === 'ready' && weather != null
+  const signature = (o: ValidatedOutfit) => `${o.title}|${o.pieces.map((p) => p.item).join('|')}`
+
+  const toggleKeep = useCallback((outfit: ValidatedOutfit) => {
+    setKept((prev) => {
+      const sig = `${outfit.title}|${outfit.pieces.map((p) => p.item).join('|')}`
+      const without = prev.filter((o) => `${o.title}|${o.pieces.map((p) => p.item).join('|')}` !== sig)
+      return without.length === prev.length ? [...prev, outfit] : without
+    })
+  }, [])
+
+  // The write happens outside the state updater on purpose. React invokes
+  // updaters twice in development, which would record the outfit twice and
+  // leave the undo removing only one of them.
+  const toggleWorn = useCallback(
+    (outfit: ValidatedOutfit, pieces: string[]) => {
+      const sig = `${outfit.title}|${outfit.pieces.map((p) => p.item).join('|')}`
+      const existing = wornAt[sig]
+      if (existing != null) {
+        removeWorn(profile.id, existing)
+        setWornAt((prev) => {
+          const next = { ...prev }
+          delete next[sig]
+          return next
+        })
+        return
+      }
+      recordWorn(profile.id, { title: outfit.title, pieces, occasion })
+      const at = loadWorn(profile.id)[0]?.at
+      if (at != null) setWornAt((prev) => ({ ...prev, [sig]: at }))
+    },
+    [wornAt, profile.id, occasion],
+  )
+
+  // Kept outfits are shown above the new ones, and the same card never appears
+  // in both lists.
+  const keptSignatures = new Set(kept.map(signature))
+  const fresh = outfits.filter((o) => !keptSignatures.has(signature(o)))
 
   return (
     <div className="mx-auto w-full max-w-md flex-1 px-4 py-5">
@@ -136,7 +180,7 @@ export function Today({
             // Never build on what's on screen — it may be days old if the app
             // has been sitting open. Refetch first if the reading has aged out.
             const current = await ensureFresh()
-            if (current) generate(closet, profile, current, occasion, anchors)
+            if (current) generate(closet, profile, current, occasion, anchors, kept)
           }}
           className="w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
         >
@@ -153,13 +197,24 @@ export function Today({
         </p>
       )}
 
-      {outfitsStatus === 'ready' && (
+      {(outfitsStatus === 'ready' || kept.length > 0) && (
         <div className="mt-5 flex flex-col gap-3">
-          {outfits.map((outfit, i) => (
-            <OutfitCard key={i} outfit={outfit} />
-          ))}
+          {[...kept, ...fresh].map((outfit) => {
+            const sig = signature(outfit)
+            return (
+              <OutfitCard
+                key={sig}
+                outfit={outfit}
+                kept={keptSignatures.has(sig)}
+                worn={wornAt[sig] != null}
+                onToggleKeep={() => toggleKeep(outfit)}
+                onToggleWorn={(pieces) => toggleWorn(outfit, pieces)}
+              />
+            )
+          })}
           {/* Meaningless when a pinned piece is the bottom — nothing rotated. */}
-          {bottomsOffered.length > 0 &&
+          {outfitsStatus === 'ready' &&
+            bottomsOffered.length > 0 &&
             !anchors.some((a) => a.category === 'Trousers' || a.category === 'Skirt') && (
               <p className="px-1 pt-1 text-xs leading-relaxed text-ink-soft">
                 <span className="font-medium">Today's rotation:</span> {bottomsOffered.join(' · ')}
