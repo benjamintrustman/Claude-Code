@@ -30,6 +30,21 @@ export type ValidatedOutfit = {
 export type OutfitResult = { outfits: ValidatedOutfit[]; bottomsOffered: string[] }
 
 export class OutfitApiError extends Error {}
+
+// The SDK puts the status and the whole JSON body into `message`, so showing it
+// raw hands the user a wall of braces. Pull out the sentence meant for humans.
+function apiMessage(err: { message: string }): string {
+  const body = err.message.match(/\{[\s\S]*\}/)
+  if (body) {
+    try {
+      const parsed = JSON.parse(body[0]) as { error?: { message?: string } }
+      if (parsed.error?.message) return parsed.error.message
+    } catch {
+      // Not JSON after all — fall through to the raw message.
+    }
+  }
+  return err.message
+}
 /** The user pressed Stop. Not a failure — the UI returns to idle silently. */
 export class OutfitAbortedError extends Error {}
 
@@ -494,8 +509,19 @@ export async function suggestOutfits(
     if (err instanceof Anthropic.APIConnectionError) {
       throw new OutfitApiError('Network error — could not reach the Anthropic API. Check your connection.')
     }
+    if (err instanceof Anthropic.BadRequestError) {
+      // The SDK has no class for an exhausted balance — a 400 covers every
+      // malformed request too, and the distinction lives only in the prose.
+      // So the type gets us here and the text gets us the rest of the way.
+      if (/credit balance/i.test(err.message)) {
+        throw new OutfitApiError(
+          'Your Anthropic API account is out of credit. Add credits at console.anthropic.com under Plans & Billing. This is the account the API key belongs to — a Claude subscription is billed separately and does not cover it.',
+        )
+      }
+      throw new OutfitApiError(`Anthropic rejected the request: ${apiMessage(err)}`)
+    }
     if (err instanceof Anthropic.APIError) {
-      throw new OutfitApiError(`Anthropic API error (HTTP ${err.status}): ${err.message}`)
+      throw new OutfitApiError(`Anthropic API error (HTTP ${err.status}): ${apiMessage(err)}`)
     }
     throw err
   }
