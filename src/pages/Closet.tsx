@@ -5,6 +5,9 @@ import { useApp } from '../context/AppContext'
 import { ItemForm } from '../components/ItemForm'
 import { TransferModal } from '../components/TransferModal'
 import { CloseIcon } from '../components/icons'
+import { DraftReview } from '../components/DraftReview'
+import type { DraftItem } from '../lib/onboarding'
+import { OnboardingError, dedupe, draftClosetFromText } from '../lib/onboarding'
 
 export function Closet({
   pinned,
@@ -18,6 +21,29 @@ export function Closet({
   const [filter, setFilter] = useState<Category | 'All'>('All')
   const [editing, setEditing] = useState<Item | null>(null)
   const [transferring, setTransferring] = useState(false)
+  // Quick add: a purchase or a whole outfit's worth, described rather than
+  // filled in field by field.
+  const [quickText, setQuickText] = useState('')
+  const [quickBusy, setQuickBusy] = useState(false)
+  const [quickError, setQuickError] = useState<string | null>(null)
+  const [quickDrafts, setQuickDrafts] = useState<DraftItem[] | null>(null)
+
+  const runQuickAdd = async () => {
+    setQuickBusy(true)
+    setQuickError(null)
+    try {
+      const rows = dedupe(await draftClosetFromText(quickText), closet)
+      if (rows.length === 0) {
+        setQuickError('Everything there is already in your closet.')
+        return
+      }
+      setQuickDrafts(rows)
+    } catch (err) {
+      setQuickError(err instanceof OnboardingError ? err.message : 'Something went wrong. Try again.')
+    } finally {
+      setQuickBusy(false)
+    }
+  }
 
   const counts = useMemo(() => {
     const map = new Map<Category, number>()
@@ -35,6 +61,29 @@ export function Closet({
       <div className="mb-1 flex items-baseline justify-between">
         <h2 className="font-serif text-2xl font-semibold text-ink">Closet</h2>
         <span className="text-sm text-ink-soft">{closet.length} pieces</span>
+      </div>
+
+      <div className="mt-3 mb-4">
+        <div className="flex gap-2">
+          <input
+            value={quickText}
+            onChange={(e) => setQuickText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && quickText.trim() && !quickBusy) runQuickAdd()
+            }}
+            placeholder="Add pieces — just describe them"
+            className="min-w-0 flex-1 rounded-full border border-line bg-card px-4 py-2 text-sm text-ink placeholder:text-ink-soft/60 focus:border-tobacco focus:outline-none"
+          />
+          <button
+            type="button"
+            disabled={quickBusy || !quickText.trim()}
+            onClick={runQuickAdd}
+            className="shrink-0 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
+          >
+            {quickBusy ? 'Reading…' : 'Add'}
+          </button>
+        </div>
+        {quickError && <p className="mt-1.5 px-1 text-xs text-clay">{quickError}</p>}
       </div>
 
       <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
@@ -113,6 +162,42 @@ export function Closet({
             setEditing(null)
           }}
         />
+      )}
+
+      {quickDrafts && (
+        <div className="fixed inset-0 z-30 flex items-end justify-center bg-ink/40 sm:items-center">
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-line bg-paper p-5 sm:rounded-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-serif text-xl font-semibold text-ink">Check these over</h3>
+              <button
+                type="button"
+                onClick={() => setQuickDrafts(null)}
+                className="shrink-0 text-ink-soft hover:text-ink"
+              >
+                <CloseIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <DraftReview
+              drafts={quickDrafts}
+              onChange={setQuickDrafts}
+              saveLabel={(n) => `Add ${n} piece${n === 1 ? '' : 's'}`}
+              backLabel="Cancel"
+              onBack={() => setQuickDrafts(null)}
+              onSave={() => {
+                quickDrafts.forEach((d) =>
+                  addItem({
+                    name: d.name,
+                    category: d.category,
+                    color: d.color,
+                    ...(d.note ? { note: d.note } : {}),
+                  }),
+                )
+                setQuickDrafts(null)
+                setQuickText('')
+              }}
+            />
+          </div>
+        </div>
       )}
 
       {transferring && (
