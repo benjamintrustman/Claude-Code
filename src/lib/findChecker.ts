@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { Gap, Item, ProfileConfig } from '../types'
-import { MissingApiKeyError, getClient } from './anthropicClient'
+import { getClient } from './anthropicClient'
+import { apiErrorMessage, responseProblem } from './apiErrors'
 
 const MODEL = 'claude-sonnet-5'
 
@@ -94,38 +95,14 @@ export async function checkFind(
       messages: [{ role: 'user', content: description.trim() }],
     })
   } catch (err) {
-    if (err instanceof MissingApiKeyError) {
-      throw new FindCheckError(err.message)
-    }
-    if (err instanceof Anthropic.AuthenticationError) {
-      throw new FindCheckError('Anthropic API key was rejected. Check VITE_ANTHROPIC_API_KEY in .env.')
-    }
-    if (err instanceof Anthropic.RateLimitError) {
-      throw new FindCheckError('Rate limited by the Anthropic API. Try again in a moment.')
-    }
-    if (err instanceof Anthropic.APIConnectionError) {
-      throw new FindCheckError('Network error — could not reach the Anthropic API. Check your connection.')
-    }
-    if (err instanceof Anthropic.APIError) {
-      throw new FindCheckError(`Anthropic API error (HTTP ${err.status}): ${err.message}`)
-    }
+    const message = apiErrorMessage(err)
+    if (message) throw new FindCheckError(message)
     throw err
   }
 
-  if (response.stop_reason === 'refusal') {
-    throw new FindCheckError('The model declined to respond to this request.')
-  }
-
-  if (response.stop_reason === 'max_tokens') {
-    throw new FindCheckError('The response was cut off before it finished. Try again.')
-  }
-
-  const textBlock = response.content.find(
-    (b): b is Anthropic.TextBlock => b.type === 'text',
-  )
-  if (!textBlock) {
-    throw new FindCheckError('The model did not return a text response.')
-  }
+  const problem = responseProblem(response)
+  if (problem) throw new FindCheckError(problem)
+  const textBlock = response.content.find((b): b is Anthropic.TextBlock => b.type === 'text')!
 
   let parsed: unknown
   try {

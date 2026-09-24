@@ -3,7 +3,8 @@ import type { Category, Item, ProfileConfig } from '../types'
 import type { CurrentWeather } from './weather'
 import { weatherCodeInfo } from './weatherCodes'
 import { occasionDescription } from '../data/occasions'
-import { MissingApiKeyError, getClient } from './anthropicClient'
+import { getClient } from './anthropicClient'
+import { apiErrorMessage, responseProblem } from './apiErrors'
 import type { WornOutfit } from './outfitHistory'
 import { loadWorn, recentlyUsedNames, rotationWindow } from './outfitHistory'
 
@@ -31,20 +32,6 @@ export type OutfitResult = { outfits: ValidatedOutfit[]; bottomsOffered: string[
 
 export class OutfitApiError extends Error {}
 
-// The SDK puts the status and the whole JSON body into `message`, so showing it
-// raw hands the user a wall of braces. Pull out the sentence meant for humans.
-function apiMessage(err: { message: string }): string {
-  const body = err.message.match(/\{[\s\S]*\}/)
-  if (body) {
-    try {
-      const parsed = JSON.parse(body[0]) as { error?: { message?: string } }
-      if (parsed.error?.message) return parsed.error.message
-    } catch {
-      // Not JSON after all — fall through to the raw message.
-    }
-  }
-  return err.message
-}
 /** The user pressed Stop. Not a failure — the UI returns to idle silently. */
 export class OutfitAbortedError extends Error {}
 
@@ -494,52 +481,19 @@ export async function suggestOutfits(
       ],
     }, { signal })
   } catch (err) {
-    if (err instanceof MissingApiKeyError) {
-      throw new OutfitApiError(err.message)
-    }
+    // Before the shared mapper: an abort is an APIError too, and it is not a
+    // failure.
     if (err instanceof Anthropic.APIUserAbortError) {
       throw new OutfitAbortedError('Stopped before the suggestions came back.')
     }
-    if (err instanceof Anthropic.AuthenticationError) {
-      throw new OutfitApiError('Anthropic API key was rejected. Check VITE_ANTHROPIC_API_KEY in .env.')
-    }
-    if (err instanceof Anthropic.RateLimitError) {
-      throw new OutfitApiError('Rate limited by the Anthropic API. Try again in a moment.')
-    }
-    if (err instanceof Anthropic.APIConnectionError) {
-      throw new OutfitApiError('Network error — could not reach the Anthropic API. Check your connection.')
-    }
-    if (err instanceof Anthropic.BadRequestError) {
-      // The SDK has no class for an exhausted balance — a 400 covers every
-      // malformed request too, and the distinction lives only in the prose.
-      // So the type gets us here and the text gets us the rest of the way.
-      if (/credit balance/i.test(err.message)) {
-        throw new OutfitApiError(
-          'Your Anthropic API account is out of credit. Add credits at console.anthropic.com under Plans & Billing. This is the account the API key belongs to — a Claude subscription is billed separately and does not cover it.',
-        )
-      }
-      throw new OutfitApiError(`Anthropic rejected the request: ${apiMessage(err)}`)
-    }
-    if (err instanceof Anthropic.APIError) {
-      throw new OutfitApiError(`Anthropic API error (HTTP ${err.status}): ${apiMessage(err)}`)
-    }
+    const message = apiErrorMessage(err)
+    if (message) throw new OutfitApiError(message)
     throw err
   }
 
-  if (response.stop_reason === 'refusal') {
-    throw new OutfitApiError('The model declined to respond to this request.')
-  }
-
-  if (response.stop_reason === 'max_tokens') {
-    throw new OutfitApiError('The response was cut off before it finished. Try again.')
-  }
-
-  const textBlock = response.content.find(
-    (b): b is Anthropic.TextBlock => b.type === 'text',
-  )
-  if (!textBlock) {
-    throw new OutfitApiError('The model did not return a text response.')
-  }
+  const problem = responseProblem(response)
+  if (problem) throw new OutfitApiError(problem)
+  const textBlock = response.content.find((b): b is Anthropic.TextBlock => b.type === 'text')!
 
   let parsed: unknown
   try {
