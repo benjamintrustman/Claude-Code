@@ -217,10 +217,16 @@ function yonaGaps(): Gap[] {
   return []
 }
 
+// A profile created in the app starts empty — there is nothing to seed it
+// with, and guessing would put clothes in someone's closet that they do not own.
 export function seedCloset(profile: ProfileId): Item[] {
-  return profile === 'ben' ? benCloset() : yonaCloset()
+  if (profile === 'ben') return benCloset()
+  if (profile === 'yona') return yonaCloset()
+  return []
 }
 
 export function seedGaps(profile: ProfileId): Gap[] {
-  return profile === 'ben' ? benGaps() : yonaGaps()
+  if (profile === 'ben') return benGaps()
+  if (profile === 'yona') return yonaGaps()
+  return []
 }

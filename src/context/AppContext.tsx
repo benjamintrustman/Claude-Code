@@ -1,9 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { Gap, Item, ProfileId } from '../types'
-import { PROFILES } from '../data/profiles'
+import type { Gap, Item, ProfileConfig, ProfileId } from '../types'
 import { seedCloset, seedGaps } from '../data/seed'
 import { readJSON, writeJSON } from '../lib/storage'
+import {
+  allProfiles,
+  closetKey,
+  createProfile as createProfileRecord,
+  deleteProfile as deleteProfileRecord,
+  findProfile,
+  gapsKey,
+  updateProfile as updateProfileRecord,
+} from '../lib/profileStore'
 
 function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -14,7 +22,11 @@ function newId(): string {
 type AppState = {
   profileId: ProfileId
   setProfileId: (id: ProfileId) => void
-  profile: (typeof PROFILES)[ProfileId]
+  profile: ProfileConfig
+  profiles: ProfileConfig[]
+  createProfile: (name: string) => ProfileConfig
+  updateProfile: (patch: Partial<ProfileConfig>) => void
+  deleteProfile: (id: ProfileId) => void
   closet: Item[]
   addItem: (item: Omit<Item, 'id'>) => void
   updateItem: (id: string, patch: Partial<Item>) => void
@@ -29,13 +41,6 @@ type AppState = {
 
 const AppContext = createContext<AppState | null>(null)
 
-function closetKey(profileId: ProfileId) {
-  return `closet:${profileId}`
-}
-function gapsKey(profileId: ProfileId) {
-  return `gaps:${profileId}`
-}
-
 function loadCloset(profileId: ProfileId): Item[] {
   return readJSON<Item[] | null>(closetKey(profileId), null) ?? seedCloset(profileId)
 }
@@ -49,20 +54,56 @@ type ProfileData = {
   gaps: Gap[]
 }
 
+/** Falls back to the first profile that exists, so a deleted or renamed active
+ *  profile cannot leave the app pointing at nothing. */
+function resolveActive(id: ProfileId): ProfileId {
+  return findProfile(id) ? id : (allProfiles()[0]?.id ?? 'ben')
+}
+
 function loadProfileData(profileId: ProfileId): ProfileData {
   return { profileId, closet: loadCloset(profileId), gaps: loadGaps(profileId) }
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<ProfileData>(() =>
-    loadProfileData(readJSON<ProfileId>('activeProfile', 'ben')),
+    loadProfileData(resolveActive(readJSON<ProfileId>('activeProfile', 'ben'))),
   )
+  const [profiles, setProfiles] = useState<ProfileConfig[]>(() => allProfiles())
   const { profileId, closet, gaps } = data
 
   const setProfileId = useCallback((id: ProfileId) => {
     writeJSON('activeProfile', id)
     setData(loadProfileData(id))
   }, [])
+
+  const createProfile = useCallback((name: string) => {
+    const created = createProfileRecord(name)
+    setProfiles(allProfiles())
+    writeJSON('activeProfile', created.id)
+    setData(loadProfileData(created.id))
+    return created
+  }, [])
+
+  const updateProfile = useCallback(
+    (patch: Partial<ProfileConfig>) => {
+      if (updateProfileRecord(profileId, patch)) setProfiles(allProfiles())
+    },
+    [profileId],
+  )
+
+  const deleteProfile = useCallback(
+    (id: ProfileId) => {
+      if (!deleteProfileRecord(id)) return
+      const remaining = allProfiles()
+      setProfiles(remaining)
+      if (id === profileId) {
+        const next = remaining[0]?.id ?? 'ben'
+        writeJSON('activeProfile', next)
+        setData(loadProfileData(next))
+      }
+    },
+    [profileId],
+  )
 
   useEffect(() => {
     writeJSON(closetKey(profileId), closet)
@@ -145,7 +186,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       profileId,
       setProfileId,
-      profile: PROFILES[profileId],
+      profile: profiles.find((p) => p.id === profileId) ?? profiles[0],
+      profiles,
+      createProfile,
+      updateProfile,
+      deleteProfile,
       closet,
       addItem,
       updateItem,
@@ -157,7 +202,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       replaceCloset,
       resetToSeed,
     }),
-    [profileId, closet, gaps, setProfileId, addItem, updateItem, deleteItem, addGap, updateGap, deleteGap, replaceCloset, resetToSeed],
+    [profileId, profiles, closet, gaps, setProfileId, createProfile, updateProfile, deleteProfile, addItem, updateItem, deleteItem, addGap, updateGap, deleteGap, replaceCloset, resetToSeed],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

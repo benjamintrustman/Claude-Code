@@ -57,11 +57,16 @@ export type Location = {
   source: LocationSource
 }
 
-export type ProfileId = 'ben' | 'yona'
+/** Any string. Ben and Yona are defined in code so their rules keep arriving
+ *  with a pull; everyone else is created in the app and lives in storage. */
+export type ProfileId = string
 
 export type ProfileConfig = {
   id: ProfileId
   name: string
+  /** Defined in src/data/profiles.ts rather than created in the app, so it
+   *  cannot be deleted here and its rules update on pull. */
+  builtIn?: boolean
   aesthetic: string
   /** Rules that govern wearing what you own — applied to outfit suggestions and to new finds. */
   hardRules: string[]
