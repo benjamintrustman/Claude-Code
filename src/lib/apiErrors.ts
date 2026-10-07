@@ -28,7 +28,9 @@ function apiMessage(err: { message: string }): string {
 export function apiErrorMessage(err: unknown): string | null {
   if (err instanceof MissingApiKeyError) return err.message
   if (err instanceof Anthropic.AuthenticationError) {
-    return 'Anthropic API key was rejected. Check VITE_ANTHROPIC_API_KEY in .env.'
+    // Keys can carry an expiry, so a key that worked yesterday failing today is
+    // a real case — and indistinguishable from a wrong one without saying so.
+    return 'Anthropic API key was rejected. It may have expired, been revoked, or been copied incorrectly — check VITE_ANTHROPIC_API_KEY in .env against console.anthropic.com, and restart the dev server after changing it.'
   }
   if (err instanceof Anthropic.RateLimitError) {
     return 'Rate limited by the Anthropic API. Try again in a moment.'
