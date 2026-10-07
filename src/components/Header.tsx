@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { CheckIcon, PlusIcon } from './icons'
+import { CheckIcon, GearIcon, PlusIcon } from './icons'
+import { SettingsModal } from './SettingsModal'
 
 export function Header() {
   const { profileId, profiles, setProfileId, createProfile } = useApp()
   const [open, setOpen] = useState(false)
   const [naming, setNaming] = useState(false)
   const [name, setName] = useState('')
+  const [settings, setSettings] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
   const active = profiles.find((p) => p.id === profileId)
 
@@ -35,6 +37,7 @@ export function Header() {
     <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-paper px-4 py-3">
       <h1 className="font-serif text-xl font-semibold tracking-tight text-ink">Fit Check</h1>
 
+      <div className="flex items-center gap-2">
       <div ref={wrap} className="relative">
         <button
           type="button"
@@ -107,6 +110,18 @@ export function Header() {
           </div>
         )}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setSettings(true)}
+        aria-label="Settings"
+        className="shrink-0 text-ink-soft hover:text-ink"
+      >
+        <GearIcon className="h-5 w-5" />
+      </button>
+      </div>
+
+      {settings && <SettingsModal onClose={() => setSettings(false)} />}
     </header>
   )
 }
