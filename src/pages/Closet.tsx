@@ -18,7 +18,7 @@ export function Closet({
 }) {
   const { closet, profile, gaps, addItem, addGap, replaceCloset, deleteItem, updateItem, resetToSeed } =
     useApp()
-  const [filter, setFilter] = useState<Category | 'All'>('All')
+  const [filter, setFilter] = useState<Category | 'All' | 'Paused'>('All')
   const [editing, setEditing] = useState<Item | null>(null)
   const [transferring, setTransferring] = useState(false)
   // Quick add: a purchase or a whole outfit's worth, described rather than
@@ -51,10 +51,13 @@ export function Closet({
     return map
   }, [closet])
 
-  const visible = useMemo(
-    () => (filter === 'All' ? closet : closet.filter((it) => it.category === filter)),
-    [closet, filter],
-  )
+  const pausedCount = useMemo(() => closet.filter((it) => it.paused).length, [closet])
+
+  const visible = useMemo(() => {
+    if (filter === 'All') return closet
+    if (filter === 'Paused') return closet.filter((it) => it.paused)
+    return closet.filter((it) => it.category === filter)
+  }, [closet, filter])
 
   return (
     <div className="mx-auto w-full max-w-md flex-1 px-4 py-5">
@@ -88,6 +91,13 @@ export function Closet({
 
       <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
         <FilterChip label="All" active={filter === 'All'} onClick={() => setFilter('All')} />
+        {pausedCount > 0 && (
+          <FilterChip
+            label={`Paused (${pausedCount})`}
+            active={filter === 'Paused'}
+            onClick={() => setFilter('Paused')}
+          />
+        )}
         {CATEGORIES.map((c) => (
           <FilterChip
             key={c}
@@ -109,7 +119,9 @@ export function Closet({
                 <button
                   type="button"
                   onClick={() => setEditing(it)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-line bg-card px-3.5 py-3 text-left transition-colors hover:border-tobacco/50"
+                  className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition-colors hover:border-tobacco/50 ${
+                    it.paused ? 'border-line/60 bg-card/50 opacity-55' : 'border-line bg-card'
+                  }`}
                 >
                   {it.photo ? (
                     <img
@@ -130,6 +142,11 @@ export function Closet({
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
+                    {it.paused && (
+                      <span className="rounded-full bg-paper-dim px-2 py-0.5 text-[11px] text-ink-soft">
+                        Paused
+                      </span>
+                    )}
                     {it.functional && (
                       <span className="rounded-full bg-paper-dim px-2 py-0.5 text-[11px] text-ink-soft">
                         Functional
@@ -157,6 +174,10 @@ export function Closet({
           }}
           pinnedCount={pinned.length}
           alreadyPinned={pinned.some((p) => p.id === editing.id)}
+          onTogglePause={() => {
+            updateItem(editing.id, { paused: !editing.paused })
+            setEditing({ ...editing, paused: !editing.paused })
+          }}
           onBuildAround={() => {
             onBuildAround(editing)
             setEditing(null)
@@ -287,6 +308,7 @@ function EditModal({
   onSave,
   onDelete,
   onBuildAround,
+  onTogglePause,
   pinnedCount,
   alreadyPinned,
 }: {
@@ -295,6 +317,7 @@ function EditModal({
   onSave: (values: Omit<Item, 'id'>) => void
   onDelete: () => void
   onBuildAround: () => void
+  onTogglePause: () => void
   pinnedCount: number
   alreadyPinned: boolean
 }) {
@@ -325,6 +348,18 @@ function EditModal({
             ? `${pinnedCount} piece${pinnedCount > 1 ? 's' : ''} pinned so far`
             : 'Pin as many pieces as you like, then get outfits built around them'}
         </p>
+
+        <button
+          type="button"
+          onClick={onTogglePause}
+          className={`mb-5 w-full rounded-full border px-4 py-2.5 text-sm transition-colors ${
+            item.paused
+              ? 'border-tobacco bg-tobacco/10 text-tobacco-dark'
+              : 'border-line text-ink-soft hover:border-tobacco/50 hover:text-ink'
+          }`}
+        >
+          {item.paused ? 'Paused — bring it back into rotation' : 'Pause — keep it out of suggestions'}
+        </button>
 
         <ItemForm initial={item} submitLabel="Save changes" onSubmit={onSave} onCancel={onClose} />
         <button

@@ -33,6 +33,10 @@ export type Item = {
   brand?: string
   rise?: number // trousers only, inches
   functional?: boolean // excluded from style suggestions (e.g. a technical puffer)
+  /** Temporarily out of rotation — the wrong season, in the wash, lent out,
+   *  or just worn to death. Still owned, so it stays in the closet and the
+   *  find checker; only outfit suggestions skip it. */
+  paused?: boolean
   photo?: string // optional base64/blob
   /** How this specific piece wants to be worn — "fitted tops only, no tuck",
    *  "statement shoe", "works best with simpler outfits". Passed to the model. */

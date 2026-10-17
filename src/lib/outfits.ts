@@ -165,8 +165,9 @@ function resolveSwaps(
 // Anything in the closet is fair game — owning it means it already works. The
 // rise minimum is a buying rule, applied by the find checker, not here.
 // Functional pieces stay out: they're chosen for utility, not for a look.
+// Paused pieces stay out too, but only until they are brought back.
 export function eligibleCloset(closet: Item[]): Item[] {
-  return closet.filter((it) => !it.functional)
+  return closet.filter((it) => !it.functional && !it.paused)
 }
 
 function buildSystemPrompt(profile: ProfileConfig, anchoredBottom: boolean): string {
