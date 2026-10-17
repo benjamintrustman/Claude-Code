@@ -33,6 +33,10 @@ export type Item = {
   brand?: string
   rise?: number // trousers only, inches
   functional?: boolean // excluded from style suggestions (e.g. a technical puffer)
+  /** How warm the piece is. The app knows the real temperature but cannot tell
+   *  a linen trouser from a flannel one by name, and most names say nothing.
+   *  Unset means no constraint rather than "medium". */
+  weight?: Weight
   /** Temporarily out of rotation — the wrong season, in the wash, lent out,
    *  or just worn to death. Still owned, so it stays in the closet and the
    *  find checker; only outfit suggestions skip it. */
@@ -63,6 +67,14 @@ export type Location = {
 
 /** Any string. Ben and Yona are defined in code so their rules keep arriving
  *  with a pull; everyone else is created in the app and lives in storage. */
+export type Weight = 'light' | 'mid' | 'heavy'
+
+export const WEIGHT_LABELS: Record<Weight, string> = {
+  light: 'Lightweight — warm days',
+  mid: 'Midweight — most days',
+  heavy: 'Heavy — cold days',
+}
+
 export type ProfileId = string
 
 export type ProfileConfig = {

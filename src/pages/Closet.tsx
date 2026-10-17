@@ -138,6 +138,7 @@ export function Closet({
                     <p className="truncate text-sm font-medium text-ink">{it.name}</p>
                     <p className="truncate text-xs text-ink-soft">
                       {it.category} · {it.color}
+                      {it.weight ? ` · ${it.weight}weight` : ''}
                       {it.rise != null ? ` · ${it.rise}" rise` : ''}
                     </p>
                   </div>
@@ -210,6 +211,7 @@ export function Closet({
                     name: d.name,
                     category: d.category,
                     color: d.color,
+                    ...(d.weight ? { weight: d.weight } : {}),
                     ...(d.note ? { note: d.note } : {}),
                   }),
                 )

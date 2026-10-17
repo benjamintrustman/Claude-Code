@@ -147,6 +147,7 @@ export function Setup({ onDone }: { onDone: () => void }) {
                 name: d.name,
                 category: d.category,
                 color: d.color,
+                ...(d.weight ? { weight: d.weight } : {}),
                 ...(d.note ? { note: d.note } : {}),
               }),
             )

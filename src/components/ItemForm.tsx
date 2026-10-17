@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
-import type { Category, Item } from '../types'
-import { CATEGORIES } from '../types'
+import type { Category, Item, Weight } from '../types'
+import { CATEGORIES, WEIGHT_LABELS } from '../types'
 import { readFileAsDataUrl } from '../lib/photo'
 import { useApp } from '../context/AppContext'
 
@@ -142,6 +142,25 @@ export function ItemForm({
           )}
         </Field>
       )}
+
+      <Field label="Weight (optional)">
+        <select
+          value={values.weight ?? ''}
+          onChange={(e) => set('weight', (e.target.value || undefined) as Weight | undefined)}
+          className="w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink focus:border-tobacco focus:outline-none"
+        >
+          <option value="">Not set — no seasonal constraint</option>
+          {(Object.keys(WEIGHT_LABELS) as Weight[]).map((w) => (
+            <option key={w} value={w}>
+              {WEIGHT_LABELS[w]}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-ink-soft">
+          Set this and the weather does the rest — a lightweight trouser stops coming up on a cold
+          morning. Leave it unset if a piece works year round.
+        </p>
+      </Field>
 
       <label className="flex items-center gap-2 text-sm text-ink">
         <input

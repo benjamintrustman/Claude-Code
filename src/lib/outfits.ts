@@ -355,9 +355,9 @@ function buildUserPrompt(
     .filter((it) => anchorIds.has(it.id) || !isBottom(it) || offeredIds.has(it.id))
     .map(
       (it) =>
-        `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''})${
-          it.note ? ` — ${it.note}` : ''
-        }`,
+        `- [${it.category}] ${it.name} (${it.color}${it.brand ? `, ${it.brand}` : ''}${
+          it.weight ? `, ${it.weight}weight` : ''
+        })${it.note ? ` — ${it.note}` : ''}`,
     )
     .join('\n')
   const bottoms = assigned.map((it, i) => `- Outfit ${i + 1}: ${it.name}`).join('\n')
@@ -391,6 +391,8 @@ Right now (${timeLabel}): ${Math.round(weather.temp)}°F, feels like ${Math.roun
 Today's range: low ${Math.round(weather.low)}°F to high ${Math.round(weather.high)}°F — a ${swing}° swing.
 
 Dress for the rest of the day, not just this moment. ${dayArcGuidance(weather, hour)}
+
+Some pieces state a weight — lightweight, midweight or heavyweight. Where one does, hold it against today's temperature: a lightweight piece on a cold day and a heavy one on a warm day are both wrong however well they work otherwise. A piece with no weight stated carries no constraint — judge it as you would anything else, and do not assume it is light.
 
 Occasion: ${occasion}${occasionDescription(occasion) ? ` — ${occasionDescription(occasion)}` : ''}
 ${recentBlock}${keptBlock}${

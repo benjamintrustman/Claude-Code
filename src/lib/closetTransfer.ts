@@ -141,6 +141,9 @@ export function parseTransfer(text: string): ParsedTransfer {
       rise: category === 'Trousers' ? rise : undefined,
       functional: row.functional === true,
       paused: row.paused === true,
+      ...(row.weight === 'light' || row.weight === 'mid' || row.weight === 'heavy'
+        ? { weight: row.weight }
+        : {}),
       note: typeof row.note === 'string' && row.note.trim() ? row.note.trim() : undefined,
       photo: typeof row.photo === 'string' && row.photo.startsWith('data:') ? row.photo : undefined,
     })

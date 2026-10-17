@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { Category, Item, ProfileConfig } from '../types'
+import type { Category, Item, ProfileConfig, Weight } from '../types'
 import { CATEGORIES } from '../types'
 import { getClient } from './anthropicClient'
 import { apiErrorMessage, responseProblem } from './apiErrors'
@@ -20,6 +20,7 @@ export type DraftItem = {
   name: string
   category: Category
   color: string
+  weight?: Weight
   note?: string
   /** Colour is the field a description is most likely to get wrong, and a wrong
    *  colour quietly poisons the value bands. Flagged so review can foreground it. */
@@ -109,6 +110,7 @@ Respond with ONLY a JSON array, no prose and no code fences. Each row:
 - "name" is how this person would recognise the piece — the words they used, tidied. Do not invent brands, and do not pad a plain description into a fake product name. "Black jeans" is a good name.
 - "color" is an ordinary colour word, not a marketing name. Where they say how dark something is, keep that: "dark brown" and "tan" are different pieces of information and the app relies on the difference.
 - "colorUncertain" is true whenever you inferred the colour rather than being told it. Be honest here; a guessed colour that looks confident is worse than one marked uncertain.
+- "weight" is "light", "mid" or "heavy", and ONLY when the fabric is stated or unmistakable from the name — linen and seersucker are light, wool, flannel, corduroy, fleece and shearling are heavy. Omit the field entirely when you would be guessing. A missing weight means the piece is judged on everything else, which is correct; a wrong one keeps a trouser out of rotation for a season.
 - "note" only when they said something about how a piece is worn or what it is for. Omit it otherwise.
 
 When they give a count — "four white tees", "a couple of black jeans" — produce that many separate rows, numbered only if they are genuinely different. When a count is vague ("a bunch of"), produce three and mark the colour uncertain.
@@ -134,6 +136,9 @@ export async function draftClosetFromText(description: string): Promise<DraftIte
       name: r.name.trim(),
       category,
       color: typeof r.color === 'string' ? r.color.trim() : '',
+      ...(r.weight === 'light' || r.weight === 'mid' || r.weight === 'heavy'
+        ? { weight: r.weight }
+        : {}),
       ...(typeof r.note === 'string' && r.note.trim() ? { note: r.note.trim() } : {}),
       colorUncertain:
         r.colorUncertain === true ||

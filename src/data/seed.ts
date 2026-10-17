@@ -5,7 +5,7 @@ function item(
   category: Category,
   name: string,
   color: string,
-  extra?: Partial<Pick<Item, 'brand' | 'rise' | 'functional' | 'note'>>,
+  extra?: Partial<Pick<Item, 'brand' | 'rise' | 'functional' | 'note' | 'weight'>>,
 ): Item {
   counter += 1
   return {
@@ -24,30 +24,30 @@ function benCloset(): Item[] {
     item('Outerwear', 'Taylor & Stitch lighter tan work jacket', 'tan'),
     item('Outerwear', 'Brown chore coat', 'brown'),
     item('Outerwear', 'Relwen army green jacket', 'army green'),
-    item('Outerwear', 'mfpen charcoal wool zip jacket (cropped)', 'charcoal'),
-    item('Outerwear', 'LL Bean grey wool blazer', 'grey'),
-    item('Outerwear', 'Outerknown wool plaid jacket, sherpa-lined', 'burgundy/tobacco/cream'),
-    item('Outerwear', 'Camel corduroy zip jacket', 'camel'),
+    item('Outerwear', 'mfpen charcoal wool zip jacket (cropped)', 'charcoal', { weight: 'heavy' }),
+    item('Outerwear', 'LL Bean grey wool blazer', 'grey', { weight: 'heavy' }),
+    item('Outerwear', 'Outerknown wool plaid jacket, sherpa-lined', 'burgundy/tobacco/cream', { weight: 'heavy' }),
+    item('Outerwear', 'Camel corduroy zip jacket', 'camel', { weight: 'heavy' }),
     item('Outerwear', 'Form + Thread sage/stone work jacket', 'sage/stone'),
     item('Outerwear', 'Patagonia blue puffer', 'blue', { functional: true }),
-    item('Outerwear', 'Patagonia Retro-X fleece (rust/terracotta sherpa)', 'rust/terracotta', { brand: 'Patagonia' }),
+    item('Outerwear', 'Patagonia Retro-X fleece (rust/terracotta sherpa)', 'rust/terracotta', { brand: 'Patagonia' , weight: 'heavy' }),
     item('Outerwear', 'Marine Layer Olive Bomber', 'Olive', { brand: 'Marine Layer' }),
-    item('Outerwear', 'Flint and Tinder Waxed Trucker Jacket', 'Brown', { brand: 'Flint and Tinder' }),
-    item('Outerwear', 'Barbour Wax Canvas Beaufort Classic Coat', 'Dark Olive', { brand: 'Barbour', note: 'This is a longer coat for colder days and light rain' }),
+    item('Outerwear', 'Flint and Tinder Waxed Trucker Jacket', 'Brown', { brand: 'Flint and Tinder' , weight: 'heavy' }),
+    item('Outerwear', 'Barbour Wax Canvas Beaufort Classic Coat', 'Dark Olive', { brand: 'Barbour', note: 'This is a longer coat for colder days and light rain' , weight: 'heavy' }),
     item('Outerwear', 'Michale Max Leather Jacket', 'Brown'),
 
     // Overshirt
     item('Overshirt', 'Wax London navy textured overshirt', 'navy'),
     item('Overshirt', 'Wax London plaid overshirt', 'cream/navy'),
-    item('Overshirt', '45R indigo linen short-sleeve overshirt', 'indigo'),
+    item('Overshirt', '45R indigo linen short-sleeve overshirt', 'indigo', { weight: 'light' }),
     item('Overshirt', 'True Grit Superior Standard overshirt', 'rust/tobacco/navy', { brand: 'True Grit', note: 'Wool blend' }),
 
     // Shirt
     item('Shirt', 'Cream/natural stripe button-up (Grandpa, Sweden)', 'cream/natural'),
     item('Shirt', 'Dusty blue-green shirt', 'dusty blue-green'),
     item('Shirt', 'Light blue Oxford shirt', 'light blue'),
-    item('Shirt', 'Olive/mustard corduroy shirt', 'olive/mustard'),
-    item('Shirt', 'Foret Seersucker Cream and Blue', 'cream/blue', { brand: 'Foret' }),
+    item('Shirt', 'Olive/mustard corduroy shirt', 'olive/mustard', { weight: 'heavy' }),
+    item('Shirt', 'Foret Seersucker Cream and Blue', 'cream/blue', { brand: 'Foret' , weight: 'light' }),
     item('Shirt', 'Rust/terracotta ribbed shirt', 'rust/terracotta'),
     item('Shirt', 'Mac Weldon shirt', 'sage/stone'),
     item('Shirt', 'Ronaldus Shamask pinstripe shirt (lavender-grey)', 'lavender-grey', { brand: 'Ronaldus Shamask' }),
@@ -56,11 +56,11 @@ function benCloset(): Item[] {
     item('Shirt', 'Wax London Light Blue Ecru Shelly Shirt', 'Blue/Ecru', { brand: 'Wax london' }),
 
     // Knitwear
-    item('Knitwear', 'Berner Kühl oatmeal ribbed wool zip knit', 'oatmeal'),
+    item('Knitwear', 'Berner Kühl oatmeal ribbed wool zip knit', 'oatmeal', { weight: 'heavy' }),
     item('Knitwear', 'Berner Kühl blue-grey zip knit', 'blue-grey'),
     item('Knitwear', 'Dark navy knit', 'dark navy'),
     item('Knitwear', 'Forét sand/camel waffle grid knit polo', 'sand/camel'),
-    item('Knitwear', 'Quince camel cashmere zip hoodie', 'camel'),
+    item('Knitwear', 'Quince camel cashmere zip hoodie', 'camel', { weight: 'heavy' }),
     item('Knitwear', 'Indie + Ash Heavy Blue Cardigan', 'Blue'),
 
     // Basics/Tee
@@ -81,9 +81,9 @@ function benCloset(): Item[] {
     // Trousers
     item('Trousers', 'Nudie Tough Tony brown herringbone trouser', 'brown', { rise: 13 }),
     item('Trousers', 'KOTN olive pleat trouser', 'olive', { rise: 12.5 }),
-    item('Trousers', 'KOTN brown corduroy trouser', 'brown', { rise: 12.5 }),
+    item('Trousers', 'KOTN brown corduroy trouser', 'brown', { rise: 12.5 , weight: 'heavy' }),
     item('Trousers', 'Indi+Ash dark olive double-front work pant', 'dark olive', { rise: 12 }),
-    item('Trousers', 'mfpen stone/greige flannel trouser', 'stone/greige', { rise: 13 }),
+    item('Trousers', 'mfpen stone/greige flannel trouser', 'stone/greige', { rise: 13 , weight: 'heavy' }),
     item('Trousers', 'Toast sand/khaki pleated wide-leg trouser', 'sand/khaki', { rise: 14 }),
     item('Trousers', 'Toast brick/terracotta wide-leg trouser', 'brick/terracotta', { rise: 14 }),
     item('Trousers', 'Carhartt dark indigo carpenter pant', 'dark indigo', { rise: 11 }),
@@ -95,7 +95,7 @@ function benCloset(): Item[] {
     item('Trousers', 'Uniqlo wide-leg khaki trouser', 'khaki', { brand: 'Uniqlo' }),
     item('Trousers', 'Mid-wash denim', 'mid-wash blue'),
     item('Trousers', 'Wax London ecru trouser', 'ecru', { brand: 'Wax London' }),
-    item('Trousers', 'Edmmond Studios wool trouser', 'olive/army green', { brand: 'Edmmond Studios', note: 'Pleated with a tapered leg — the exception to his wide-leg trousers, so it reads narrower' }),
+    item('Trousers', 'Edmmond Studios wool trouser', 'olive/army green', { brand: 'Edmmond Studios', note: 'Pleated with a tapered leg — the exception to his wide-leg trousers, so it reads narrower' , weight: 'heavy' }),
     item('Trousers', 'Carhartt Parrish Pant', 'Obsidian Stone Grey', { brand: 'Carhartt', rise: 13.5 }),
 
     // Footwear

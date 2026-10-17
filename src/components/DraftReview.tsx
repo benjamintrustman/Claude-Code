@@ -1,5 +1,5 @@
-import type { Category } from '../types'
-import { CATEGORIES } from '../types'
+import type { Category, Weight } from '../types'
+import { CATEGORIES, WEIGHT_LABELS } from '../types'
 import type { DraftItem } from '../lib/onboarding'
 import { CloseIcon } from './icons'
 
@@ -58,23 +58,37 @@ export function DraftReview({
                 <CloseIcon className="h-3.5 w-3.5" />
               </button>
             </div>
-            <div className="flex gap-2">
-              <select
-                value={d.category}
-                onChange={(e) => patch(i, { category: e.target.value as Category })}
-                className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-2 py-1.5 text-xs text-ink focus:border-tobacco focus:outline-none"
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <select
+                  value={d.category}
+                  onChange={(e) => patch(i, { category: e.target.value as Category })}
+                  className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-2 py-1.5 text-xs text-ink focus:border-tobacco focus:outline-none"
+                >
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={d.weight ?? ''}
+                  onChange={(e) => patch(i, { weight: (e.target.value || undefined) as Weight | undefined })}
+                  className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-2 py-1.5 text-xs text-ink focus:border-tobacco focus:outline-none"
+                >
+                  <option value="">Any weather</option>
+                  {(Object.keys(WEIGHT_LABELS) as Weight[]).map((w) => (
+                    <option key={w} value={w}>
+                      {WEIGHT_LABELS[w]}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <input
                 value={d.color}
                 placeholder="colour"
                 onChange={(e) => patch(i, { color: e.target.value, colorUncertain: false })}
-                className={`min-w-0 flex-1 rounded-lg border bg-paper px-2.5 py-1.5 text-xs focus:outline-none ${
+                className={`w-full rounded-lg border bg-paper px-2.5 py-1.5 text-xs focus:outline-none ${
                   d.colorUncertain
                     ? 'border-clay/50 bg-clay-bg/30 text-clay'
                     : 'border-line text-ink focus:border-tobacco'
