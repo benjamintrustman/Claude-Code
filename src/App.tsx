@@ -8,6 +8,7 @@ import { Today } from './pages/Today'
 import { Closet } from './pages/Closet'
 import { AddItem } from './pages/AddItem'
 import { Gaps } from './pages/Gaps'
+import { Worn } from './pages/Worn'
 import { Setup } from './pages/Setup'
 import { useApp } from './context/AppContext'
 
@@ -78,6 +79,7 @@ function Shell() {
         )}
         {tab === 'closet' && <Closet pinned={anchors} onBuildAround={pinItem} />}
         {tab === 'add' && <AddItem onAdded={() => setTab('closet')} />}
+        {tab === 'worn' && <Worn />}
         {tab === 'gaps' && <Gaps />}
       </main>
       <BottomNav

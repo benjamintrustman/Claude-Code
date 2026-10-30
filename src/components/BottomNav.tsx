@@ -1,12 +1,13 @@
 import type { ComponentType } from 'react'
-import { HangerIcon, PlusIcon, SunIcon, TargetIcon } from './icons'
+import { HangerIcon, HistoryIcon, PlusIcon, SunIcon, TargetIcon } from './icons'
 
-export type Tab = 'today' | 'closet' | 'add' | 'gaps'
+export type Tab = 'today' | 'closet' | 'add' | 'worn' | 'gaps'
 
 const TABS: { id: Tab; label: string; Icon: ComponentType<{ className?: string }> }[] = [
   { id: 'today', label: 'Today', Icon: SunIcon },
   { id: 'closet', label: 'Closet', Icon: HangerIcon },
   { id: 'add', label: 'Add', Icon: PlusIcon },
+  { id: 'worn', label: 'Worn', Icon: HistoryIcon },
   { id: 'gaps', label: 'Gaps', Icon: TargetIcon },
 ]
 
@@ -21,7 +22,7 @@ export function BottomNav({ active, onChange }: { active: Tab; onChange: (tab: T
               key={id}
               type="button"
               onClick={() => onChange(id)}
-              className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-xs transition-colors ${
+              className={`flex min-w-0 flex-1 flex-col items-center gap-1 px-0.5 py-2.5 text-[11px] transition-colors ${
                 isActive ? 'text-tobacco-dark' : 'text-ink-soft'
               }`}
             >
