@@ -12,6 +12,7 @@ import { OCCASIONS } from '../data/occasions'
 import type { Item } from '../types'
 import type { ValidatedOutfit } from '../lib/outfits'
 import { loadWorn, recordWorn, removeWorn } from '../lib/outfitHistory'
+import { localDate, todayValue } from '../lib/closetSearch'
 
 export function Today({
   anchors,
@@ -244,10 +245,17 @@ export function Today({
           closet={closet}
           occasion={occasion}
           onClose={() => setLogging(false)}
-          onSave={(pieces, when) => {
-            recordWorn(profile.id, { title: 'Your own outfit', pieces, occasion: when })
+          onSave={(pieces, when, date) => {
+            const at = localDate(date) ?? Date.now()
+            recordWorn(profile.id, { title: 'Your own outfit', pieces, occasion: when }, at)
             setLogging(false)
-            setLogged(`Logged ${pieces.length} piece${pieces.length === 1 ? '' : 's'} as worn.`)
+            const day =
+              date === todayValue()
+                ? 'today'
+                : new Date(at).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })
+            setLogged(
+              `Logged ${pieces.length} piece${pieces.length === 1 ? '' : 's'} as worn ${day}.`,
+            )
           }}
         />
       )}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Item } from '../types'
-import { searchCloset } from '../lib/closetSearch'
+import { searchCloset, todayValue } from '../lib/closetSearch'
 import { OCCASIONS } from '../data/occasions'
 import { CloseIcon, PlusIcon } from './icons'
 
@@ -18,11 +18,13 @@ export function LogOutfitModal({
   closet: Item[]
   occasion: string
   onClose: () => void
-  onSave: (pieces: string[], occasion: string) => void
+  onSave: (pieces: string[], occasion: string, date: string) => void
 }) {
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState<Item[]>([])
   const [when, setWhen] = useState(occasion)
+  const today = todayValue()
+  const [date, setDate] = useState(today)
 
   const pickedIds = useMemo(() => new Set(picked.map((p) => p.id)), [picked])
   const results = useMemo(
@@ -97,6 +99,20 @@ export function LogOutfitModal({
           </ul>
         )}
 
+        <h4 className="mt-5 mb-2 text-sm font-medium text-ink-soft">When</h4>
+        <input
+          type="date"
+          value={date}
+          max={today}
+          onChange={(e) => setDate(e.target.value || today)}
+          className="w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink focus:border-tobacco focus:outline-none"
+        />
+        {date !== today && (
+          <p className="mt-1 text-xs text-ink-soft">
+            Catching up. It slots into the history by date, not by when you entered it.
+          </p>
+        )}
+
         <h4 className="mt-5 mb-2 text-sm font-medium text-ink-soft">Occasion</h4>
         <div className="flex flex-wrap gap-2">
           {OCCASIONS.map((o) => (
@@ -118,7 +134,7 @@ export function LogOutfitModal({
         <button
           type="button"
           disabled={picked.length === 0}
-          onClick={() => onSave(picked.map((p) => p.name), when)}
+          onClick={() => onSave(picked.map((p) => p.name), when, date)}
           className="mt-5 w-full rounded-full bg-ink px-4 py-3 text-sm font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {picked.length === 0

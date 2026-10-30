@@ -24,9 +24,19 @@ export function loadWorn(profileId: ProfileId): WornOutfit[] {
   return readJSON<WornOutfit[]>(key(profileId), [])
 }
 
-export function recordWorn(profileId: ProfileId, outfit: Omit<WornOutfit, 'at'>): void {
-  const entry: WornOutfit = { ...outfit, at: Date.now() }
-  writeJSON(key(profileId), [entry, ...loadWorn(profileId)].slice(0, WORN_LIMIT))
+/**
+ * `at` defaults to now. A backdated entry cannot simply go on the front: the
+ * rotation window is the first nine, so an unsorted list would treat something
+ * worn a fortnight ago as the most recent thing in the wardrobe.
+ */
+export function recordWorn(
+  profileId: ProfileId,
+  outfit: Omit<WornOutfit, 'at'>,
+  at: number = Date.now(),
+): void {
+  const entry: WornOutfit = { ...outfit, at }
+  const all = [entry, ...loadWorn(profileId)].sort((a, b) => b.at - a.at)
+  writeJSON(key(profileId), all.slice(0, WORN_LIMIT))
 }
 
 /** Undo. Matched on timestamp, which is unique enough at human tapping speed. */

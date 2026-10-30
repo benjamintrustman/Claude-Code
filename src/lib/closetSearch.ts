@@ -36,3 +36,19 @@ export function searchCloset(query: string, closet: Item[], limit = 8): Item[] {
   }
   return scored.sort((a, b) => b.score - a.score).slice(0, limit).map((s) => s.item)
 }
+
+/** `yyyy-mm-dd` from a date input, read in local time. Parsing the string
+ *  directly gives UTC midnight, which is the day before in any western
+ *  timezone — noon sidesteps that and every daylight-saving edge with it. */
+export function localDate(value: string): number | null {
+  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!m) return null
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12).getTime()
+}
+
+/** Today as `yyyy-mm-dd` in local time, for a date input's value and max. */
+export function todayValue(): string {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
