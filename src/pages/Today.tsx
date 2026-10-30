@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext'
 import { WeatherCard } from '../components/WeatherCard'
 import { LocationModal } from '../components/LocationModal'
 import { OutfitCard } from '../components/OutfitCard'
+import { LogOutfitModal } from '../components/LogOutfitModal'
 import { AlertIcon, CloseIcon } from '../components/icons'
 import { OCCASIONS } from '../data/occasions'
 import type { Item } from '../types'
@@ -24,6 +25,8 @@ export function Today({
   const { closet, profile } = useApp()
   const [occasion, setOccasion] = useState(OCCASIONS[0].label)
   const [editingLocation, setEditingLocation] = useState(false)
+  const [logging, setLogging] = useState(false)
+  const [logged, setLogged] = useState<string | null>(null)
   // Outfits held back through a re-run. Session-only: a shortlist while
   // deciding, not a record of anything.
   const [kept, setKept] = useState<ValidatedOutfit[]>([])
@@ -190,6 +193,19 @@ export function Today({
         </button>
       )}
 
+      <button
+        type="button"
+        onClick={() => {
+          setLogged(null)
+          setLogging(true)
+        }}
+        className="mt-3 w-full text-center text-xs text-ink-soft underline decoration-line underline-offset-2 hover:text-ink"
+      >
+        Dressed yourself today? Log what you wore
+      </button>
+
+      {logged && <p className="mt-2 text-center text-xs text-tobacco-dark">{logged}</p>}
+
       {outfitsStatus === 'error' && outfitsError && (
         <p className="mt-3 flex items-start gap-1.5 text-sm text-clay">
           <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
@@ -221,6 +237,19 @@ export function Today({
               </p>
             )}
         </div>
+      )}
+
+      {logging && (
+        <LogOutfitModal
+          closet={closet}
+          occasion={occasion}
+          onClose={() => setLogging(false)}
+          onSave={(pieces, when) => {
+            recordWorn(profile.id, { title: 'Your own outfit', pieces, occasion: when })
+            setLogging(false)
+            setLogged(`Logged ${pieces.length} piece${pieces.length === 1 ? '' : 's'} as worn.`)
+          }}
+        />
       )}
 
       {editingLocation && (
